@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'deposit_screen.dart';
@@ -5,6 +6,7 @@ import 'withdraw_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
 
+import '../models/transaction.dart';
 import '../services/storage_service.dart';
 import '../widgets/balance_card.dart';
 
@@ -17,17 +19,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   double balance = 0;
+  List<AppTransaction> transactions = [];
 
   @override
   void initState() {
     super.initState();
-    balance = StorageService.getBalance();
+    _loadData();
   }
 
-  void refresh() => setState(() => balance = StorageService.getBalance());
+  void _loadData() {
+    setState(() {
+      balance = StorageService.getBalance();
+      transactions = StorageService.getTransactions().reversed.toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final spots = [
+      for (int i = 0; i < transactions.length; i++)
+        FlSpot(i.toDouble(), transactions[i].balanceAfter),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Conta da Filha'),
@@ -39,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
-              refresh();
+              _loadData();
             },
           ),
         ],
@@ -50,7 +63,20 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             BalanceCard(balance: balance),
             const SizedBox(height: 16),
-            // botoes
+            if (spots.length > 1)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: LineChart(
+                    LineChartData(
+                      lineBarsData: [
+                        LineChartBarData(spots: spots, isCurved: true),
+                      ],
+                      gridData: FlGridData(show: true),
+                    ),
+                  ),
+                ),
+              ),
             Row(
               children: [
                 Expanded(
@@ -62,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           builder: (_) => const DepositScreen(),
                         ),
                       );
-                      refresh();
+                      _loadData();
                     },
                     child: const Text("Depositar"),
                   ),
@@ -77,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           builder: (_) => const WithdrawScreen(),
                         ),
                       );
-                      refresh();
+                      _loadData();
                     },
                     child: const Text("Sacar"),
                   ),
@@ -92,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           builder: (_) => const HistoryScreen(),
                         ),
                       );
-                      refresh();
+                      _loadData();
                     },
                     child: const Text("Histórico"),
                   ),
