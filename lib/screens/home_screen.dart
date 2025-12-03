@@ -50,37 +50,54 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             BalanceCard(balance: balance),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DepositScreen()),
-                );
-                refresh();
-              },
-              child: const Text("Depositar"),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const WithdrawScreen()),
-                );
-                refresh();
-              },
-              child: const Text("Sacar"),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                );
-                refresh();
-              },
-              child: const Text("Histórico"),
+            // botoes
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DepositScreen(),
+                        ),
+                      );
+                      refresh();
+                    },
+                    child: const Text("Depositar"),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WithdrawScreen(),
+                        ),
+                      );
+                      refresh();
+                    },
+                    child: const Text("Sacar"),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HistoryScreen(),
+                        ),
+                      );
+                      refresh();
+                    },
+                    child: const Text("Histórico"),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
