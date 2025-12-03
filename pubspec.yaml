@@ -1,0 +1,24 @@
+name: my_kid_money
+version: 0.1.0+1
+description: Conta simulada para crianças
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.2.2
+  local_auth: ^3.0.0
+  fl_chart: ^1.1.1
+  flutter_lints: ^6.0.0
+  path_provider: ^2.0.12
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
