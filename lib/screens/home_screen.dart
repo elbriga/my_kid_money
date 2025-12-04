@@ -2,10 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'deposit_screen.dart';
-import 'withdraw_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
-
+import 'withdraw_screen.dart';
 import '../models/transaction.dart';
 import '../services/storage_service.dart';
 import '../widgets/balance_card.dart';
@@ -19,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   double balance = 0;
+  String childName = '';
   List<AppTransaction> transactions = [];
 
   @override
@@ -30,8 +30,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void _loadData() {
     setState(() {
       balance = StorageService.getBalance();
+      childName = StorageService.getChildName();
       transactions = StorageService.getTransactions().reversed.toList();
     });
+  }
+
+  String get _appBarTitle {
+    if (childName.isEmpty) return 'Conta Digital';
+    return 'Conta de $childName';
   }
 
   @override
@@ -43,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conta da Filha'),
+        title: Text(_appBarTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),

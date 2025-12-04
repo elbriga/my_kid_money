@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../services/storage_service.dart';
@@ -12,28 +11,21 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _controller = TextEditingController();
-  String? _currentName;
 
   @override
   void initState() {
     super.initState();
-    _loadName();
-  }
-
-  Future<void> _loadName() async {
-    final file = await StorageService.getConfigFile();
-    if (!await file.exists()) return;
-
-    final map = jsonDecode(await file.readAsString());
-    setState(() => _currentName = map['childName']);
-    _controller.text = _currentName ?? '';
+    _controller.text = StorageService.getChildName();
   }
 
   Future<void> _save() async {
-    final file = await StorageService.getConfigFile();
-    final map = {'childName': _controller.text};
-    await file.writeAsString(jsonEncode(map));
-    if (mounted) Navigator.pop(context);
+    await StorageService.setChildName(_controller.text);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nome salvo com sucesso!')),
+      );
+      Navigator.pop(context);
+    }
   }
 
   @override

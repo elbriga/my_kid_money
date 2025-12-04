@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart';
 import '../models/transaction.dart';
 
 class StorageService {
@@ -9,7 +7,7 @@ class StorageService {
 
   static const _balanceKey = 'balance';
   static const _transactionsKey = 'transactions';
-  static const _configFileName = 'conta_infantil_config.json';
+  static const _childNameKey = 'childName';
 
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -18,6 +16,7 @@ class StorageService {
       _transactionsKey,
       _prefs.getStringList(_transactionsKey) ?? [],
     );
+    _prefs.setString(_childNameKey, _prefs.getString(_childNameKey) ?? '');
   }
 
   static double getBalance() => _prefs.getDouble(_balanceKey) ?? 0.0;
@@ -38,14 +37,8 @@ class StorageService {
     await setBalance(t.balanceAfter);
   }
 
-  /// Returns the File used for app configuration (child name etc.).
-  static Future<File> getConfigFile() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/$_configFileName');
-    if (!await file.exists()) {
-      await file.create(recursive: true);
-      await file.writeAsString('{}');
-    }
-    return file;
-  }
+  static String getChildName() => _prefs.getString(_childNameKey) ?? '';
+
+  static Future<void> setChildName(String name) async =>
+      _prefs.setString(_childNameKey, name);
 }
