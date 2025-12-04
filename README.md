@@ -27,6 +27,10 @@ O projeto segue uma estrutura padrão do Flutter, com uma clara separação de r
 
 O estado da aplicação é gerenciado de forma simples, utilizando `StatefulWidget`. A atualização dos dados entre as telas é feita através de um mecanismo de callback. Por exemplo, ao retornar da tela de depósito para a tela inicial, um método `refresh()` é chamado para recarregar os dados do `StorageService` e atualizar a interface.
 
+## TODO List
+
+* Modo multi-filhos! Uma conta para cada com uma seleção de filho na tela inicial
+
 ## Como Executar o Projeto
 
 ### 1. Instalar Dependências
@@ -41,11 +45,4 @@ Você pode rodar o aplicativo em um dispositivo conectado ou em um emulador:
 
 ```bash
 flutter run
-```
-
-### 3. Rodar os Testes
-Para executar os testes de widget incluídos no projeto:
-
-```bash
-flutter test
 ```
