@@ -41,4 +41,9 @@ class StorageService {
 
   static Future<void> setChildName(String name) async =>
       _prefs.setString(_childNameKey, name);
+
+  static Future<void> clearTransactions() async {
+    await _prefs.remove(_transactionsKey);
+    await _prefs.setDouble(_balanceKey, 0.0);
+  }
 }
