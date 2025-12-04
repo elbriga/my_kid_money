@@ -14,7 +14,8 @@ class DepositScreen extends StatefulWidget {
 }
 
 class _DepositScreenState extends State<DepositScreen> {
-  final controller = TextEditingController();
+  final controllerValor = TextEditingController();
+  final controllerDescricao = TextEditingController();
   late ConfettiController _confettiController;
   late AudioPlayer _audioPlayer;
 
@@ -38,11 +39,12 @@ class _DepositScreenState extends State<DepositScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
   Future<void> doDeposit() async {
-    final value = double.tryParse(controller.text.replaceAll(',', '.'));
+    final value = double.tryParse(controllerValor.text.replaceAll(',', '.'));
     if (value == null || value <= 0) {
       showMsg("Valor inválido");
       return;
     }
+    final desc = controllerDescricao.text;
 
     final ok = await BiometricService.authenticate("Confirme para depositar");
     if (!ok) {
@@ -62,6 +64,7 @@ class _DepositScreenState extends State<DepositScreen> {
         value: value,
         timestamp: DateTime.now(),
         balanceAfter: newBalance,
+        description: desc,
       ),
     );
 
@@ -82,10 +85,16 @@ class _DepositScreenState extends State<DepositScreen> {
             child: Column(
               children: [
                 TextField(
-                  controller: controller,
+                  controller: controllerValor,
                   decoration: const InputDecoration(labelText: "Valor"),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
+                  ),
+                ),
+                TextField(
+                  controller: controllerDescricao,
+                  decoration: const InputDecoration(
+                    labelText: "Descrição (opcional)",
                   ),
                 ),
                 const SizedBox(height: 16),

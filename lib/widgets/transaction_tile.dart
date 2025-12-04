@@ -9,6 +9,9 @@ class TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = t.value >= 0 ? Colors.green : Colors.red;
     final sign = t.value >= 0 ? '+' : '-';
+    final desc = t.description != ''
+        ? t.description
+        : (sign == '+' ? 'Depósito' : 'Saque');
 
     return ListTile(
       leading: CircleAvatar(child: Text(sign)),
@@ -16,8 +19,11 @@ class TransactionTile extends StatelessWidget {
         "$sign R\$ ${t.value.abs().toStringAsFixed(2)}",
         style: TextStyle(color: color, fontWeight: FontWeight.bold),
       ),
-      subtitle: Text(t.timestamp.toString().split('.')[0]),
-      trailing: Text("R\$ ${t.balanceAfter.toStringAsFixed(2)}"),
+      subtitle: Text(desc),
+      trailing: Text(
+        "R\$ ${t.balanceAfter.toStringAsFixed(2)}\n"
+        "${t.timestamp.toString().split('.')[0]}",
+      ),
     );
   }
 }

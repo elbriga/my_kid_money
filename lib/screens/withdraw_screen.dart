@@ -11,14 +11,17 @@ class WithdrawScreen extends StatefulWidget {
 }
 
 class _WithdrawScreenState extends State<WithdrawScreen> {
-  final controller = TextEditingController();
+  final controllerValor = TextEditingController();
+  final controllerDescricao = TextEditingController();
 
   void showMsg(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
   Future<void> doWithdraw() async {
-    final value = double.tryParse(controller.text.replaceAll(',', '.'));
+    final value = double.tryParse(controllerValor.text.replaceAll(',', '.'));
     if (value == null || value <= 0) return showMsg("Valor inválido");
+
+    final desc = controllerDescricao.text;
 
     final current = StorageService.getBalance();
     if (value > current) return showMsg("Saldo insuficiente");
@@ -33,6 +36,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
         value: -value,
         timestamp: DateTime.now(),
         balanceAfter: newBalance,
+        description: desc,
       ),
     );
 
@@ -48,8 +52,17 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
         child: Column(
           children: [
             TextField(
-              controller: controller,
+              controller: controllerValor,
               decoration: const InputDecoration(labelText: "Valor"),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+            TextField(
+              controller: controllerDescricao,
+              decoration: const InputDecoration(
+                labelText: "Descrição (opcional)",
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
