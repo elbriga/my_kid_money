@@ -1,5 +1,5 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import 'deposit_screen.dart';
 import 'history_screen.dart';
@@ -7,6 +7,7 @@ import 'settings_screen.dart';
 import 'withdraw_screen.dart';
 import '../models/transaction.dart';
 import '../services/storage_service.dart';
+import '../services/biometric_service.dart';
 import '../widgets/balance_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,6 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadData();
   }
+
+  void showMsg(String m) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
   void _loadData() {
     setState(() {
@@ -54,10 +58,19 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () async {
+              final ok = await BiometricService.authenticate(
+                "Confirme sua identidade!",
+              );
+              if (!ok) return showMsg("Falha na autenticação");
+
+              if (!context.mounted) return;
+
+              final ctx = context; // captura o BuildContext antes do await
               await Navigator.push(
-                context,
+                ctx,
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
+
               _loadData();
             },
           ),
