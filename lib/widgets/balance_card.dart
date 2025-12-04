@@ -20,6 +20,7 @@ class BalanceCard extends StatelessWidget {
                   "R\$ ${balance.toStringAsFixed(2)}",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
+                    color: Colors.green,
                     fontSize: 26,
                   ),
                 ),
