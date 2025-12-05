@@ -1,4 +1,4 @@
-package com.example.my_kid_money
+package com.gsoftcreations.my_kid_money
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
