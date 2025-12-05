@@ -14,7 +14,7 @@ class StorageService {
 
     // Initialize accounts if they don't exist
     if (!_prefs.containsKey(_accountsListKey)) {
-      final defaultAccount = Account(name: 'Minha Conta Principal');
+      final defaultAccount = Account(name: 'Meu Cofrinho');
       await _saveAllAccounts([defaultAccount]);
       await _prefs.setString(_currentAccountIdKey, defaultAccount.id);
     }

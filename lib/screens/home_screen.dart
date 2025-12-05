@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_accounts.isEmpty) {
         // This case should ideally be handled by StorageService.init()
         // but as a fallback, create a default account
-        final defaultAccount = Account(name: 'Minha Conta Principal');
+        final defaultAccount = Account(name: 'Meu Cofrinho');
         await StorageService.addAccount(defaultAccount);
         await StorageService.setCurrentAccountId(defaultAccount.id);
         _accounts.add(defaultAccount);
