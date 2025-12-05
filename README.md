@@ -1,4 +1,4 @@
-# Carteira Digital Infantil
+# Carteira Digital Infantil - Meu Cofrinho
 
 ## Visão Geral do Projeto
 
