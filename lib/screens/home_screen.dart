@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 import 'deposit_screen.dart';
 import 'history_screen.dart';
@@ -97,8 +98,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final spots = [
-      for (int i = 0; i < _currentAccount!.transactions.length; i++)
-        FlSpot(i.toDouble(), _currentAccount!.transactions[i].balanceAfter),
+      for (final transaction in _currentAccount!.transactions)
+        FlSpot(
+          transaction.timestamp.millisecondsSinceEpoch.toDouble(),
+          transaction.balanceAfter,
+        ),
     ];
 
     return Scaffold(
@@ -187,20 +191,53 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Theme.of(context).colorScheme.secondary,
                           barWidth: 4,
                           isStrokeCapRound: true,
-                          dotData: const FlDotData(show: false),
+                          dotData: const FlDotData(show: true),
                           belowBarData: BarAreaData(show: false),
                         ),
                       ],
-                      titlesData: const FlTitlesData(show: true),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 40,
+                            interval: spots.length > 1
+                                ? (spots.last.x - spots.first.x) / 4
+                                : 1,
+                            getTitlesWidget: (value, meta) {
+                              final timestamp =
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    value.toInt(),
+                                  );
+                              final formattedDate = DateFormat(
+                                'dd/MM\nHH:mm',
+                              ).format(timestamp);
+                              return SideTitleWidget(
+                                meta: meta,
+                                // axisSide: meta.axisSide,
+                                child: Text(
+                                  formattedDate,
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        leftTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 40,
+                          ),
+                        ),
+                      ),
                       borderData: FlBorderData(show: true),
                       gridData: const FlGridData(show: true),
-                      // Optional: customize axis titles for clarity
-                      // leftTitles: AxisTitles(
-                      //   sideTitles: SideTitles(showTitles: true, reservedSize: 40),
-                      // ),
-                      // bottomTitles: AxisTitles(
-                      //   sideTitles: SideTitles(showTitles: false),
-                      // ),
                     ),
                   ),
                 ),
