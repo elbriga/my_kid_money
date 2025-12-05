@@ -1,10 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
-import '../models/transaction.dart';
 import '../models/account.dart';
-
-const _uuid = Uuid();
 
 class StorageService {
   static late SharedPreferences _prefs;

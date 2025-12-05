@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -90,9 +92,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   final newAccount = Account(name: newAccountName.trim());
                   await StorageService.addAccount(newAccount);
                   await StorageService.setCurrentAccountId(newAccount.id);
+                  if (!context.mounted) return;
                   Navigator.pop(context);
                   _loadData(); // Reload data to update UI with new account
                 } else {
+                  if (!context.mounted) return;
                   showMsg('O nome da conta não pode ser vazio.');
                 }
               },
@@ -158,7 +162,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       .map(
                         (account) => DropdownMenuItem(
                           value: account.id,
-                          child: Text(account.name),
+                          child: Row(
+                            children: [
+                              if (account.imagePath != null)
+                                CircleAvatar(
+                                  backgroundImage: FileImage(
+                                    File(account.imagePath!),
+                                  ),
+                                )
+                              else
+                                const CircleAvatar(
+                                  child: Icon(Icons.person),
+                                ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(account.name),
+                              ),
+                            ],
+                          ),
                         ),
                       )
                       .toList(),
@@ -189,7 +210,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                MaterialPageRoute(
+                  builder: (_) => SettingsScreen(account: _currentAccount!),
+                ),
               );
 
               _loadData(); // Refresh data after returning from settings

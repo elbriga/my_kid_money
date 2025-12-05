@@ -9,14 +9,16 @@ class Account {
   String name;
   double balance;
   List<AppTransaction> transactions;
+  String? imagePath;
 
   Account({
     String? id,
     required this.name,
     this.balance = 0.0,
     List<AppTransaction>? transactions,
-  }) : id = id ?? uuid.v4(),
-       transactions = transactions ?? [];
+    this.imagePath,
+  })  : id = id ?? uuid.v4(),
+        transactions = transactions ?? [];
 
   factory Account.fromJson(Map<String, dynamic> json) {
     return Account(
@@ -26,6 +28,7 @@ class Account {
       transactions: (json['transactions'] as List<dynamic>)
           .map((e) => AppTransaction.fromJson(e as Map<String, dynamic>))
           .toList(),
+      imagePath: json['imagePath'] as String?,
     );
   }
 
@@ -35,6 +38,7 @@ class Account {
       'name': name,
       'balance': balance,
       'transactions': transactions.map((e) => e.toJson()).toList(),
+      'imagePath': imagePath,
     };
   }
 

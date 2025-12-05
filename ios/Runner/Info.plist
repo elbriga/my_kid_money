@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>Este aplicativo precisa de acesso à galeria para que você possa escolher uma foto de perfil para a conta.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Este aplicativo precisa de acesso à câmera para que você possa tirar uma foto de perfil para a conta.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Este aplicativo precisa de acesso ao microfone se você desejar gravar vídeos como parte do perfil.</string>
 </dict>
 </plist>

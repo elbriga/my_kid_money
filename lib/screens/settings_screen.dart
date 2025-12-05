@@ -1,30 +1,50 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../models/account.dart';
 import '../services/biometric_service.dart';
 import '../services/storage_service.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final Account account;
+
+  const SettingsScreen({super.key, required this.account});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final _controller = TextEditingController();
+  final _nameController = TextEditingController();
+  final _imagePicker = ImagePicker();
+  String? _imagePath;
 
   @override
   void initState() {
     super.initState();
-    _controller.text = StorageService.getChildName();
+    _nameController.text = widget.account.name;
+    _imagePath = widget.account.imagePath;
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imagePath = pickedFile.path;
+      });
+    }
   }
 
   Future<void> _save() async {
-    await StorageService.setChildName(_controller.text);
+    widget.account.name = _nameController.text;
+    widget.account.imagePath = _imagePath;
+    await StorageService.updateAccount(widget.account);
     if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nome salvo com sucesso!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conta atualizada com sucesso!')),
+      );
       Navigator.pop(context);
     }
   }
@@ -78,14 +98,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Configurações')),
+      appBar: AppBar(title: const Text('Configurações da Conta')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            GestureDetector(
+              onTap: _pickImage,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage:
+                    _imagePath != null ? FileImage(File(_imagePath!)) : null,
+                child: _imagePath == null
+                    ? const Icon(Icons.camera_alt, size: 50)
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 20),
             TextField(
-              controller: _controller,
-              decoration: const InputDecoration(labelText: 'Nome da criança'),
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Nome da Conta'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(onPressed: _save, child: const Text('Salvar')),
