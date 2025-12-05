@@ -1,7 +1,7 @@
 import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
-  static final _disabled = 1;
+  static final _disabled = 0;
   static final _auth = LocalAuthentication();
 
   static Future<bool> authenticate(String msg) async {
@@ -11,7 +11,6 @@ class BiometricService {
       final ok = await _auth.authenticate(
         localizedReason: msg,
         biometricOnly: true,
-        //stickyAuth: true,
       );
       return ok;
     } catch (_) {

@@ -51,5 +51,7 @@
     <string>Este aplicativo precisa de acesso à câmera para que você possa tirar uma foto de perfil para a conta.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Este aplicativo precisa de acesso ao microfone se você desejar gravar vídeos como parte do perfil.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>O FaceID é usado para fazer depositos e saques</string>
 </dict>
 </plist>
