@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <application
         android:enableOnBackInvokedCallback="true"
-        android:label="My Kids Money"
+        android:label="Meu Cofrinho"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
