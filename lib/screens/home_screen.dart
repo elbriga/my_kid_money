@@ -67,47 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _showAddAccountDialog() async {
-    String newAccountName = '';
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Nova Conta'),
-          content: TextField(
-            autofocus: true,
-            decoration: const InputDecoration(hintText: 'Nome da conta'),
-            onChanged: (value) {
-              newAccountName = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (newAccountName.trim().isNotEmpty) {
-                  final newAccount = Account(name: newAccountName.trim());
-                  await StorageService.addAccount(newAccount);
-                  await StorageService.setCurrentAccountId(newAccount.id);
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-                  _loadData(); // Reload data to update UI with new account
-                } else {
-                  if (!context.mounted) return;
-                  showMsg('O nome da conta não pode ser vazio.');
-                }
-              },
-              child: const Text('Criar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -119,12 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Conta Digital'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _showAddAccountDialog,
-            ),
-          ],
         ),
         body: Center(
           child: Column(
@@ -132,7 +85,11 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Text('Nenhuma conta encontrada.'),
               ElevatedButton(
-                onPressed: _showAddAccountDialog,
+                onPressed: () {
+                  // This button should likely navigate to a dedicated "Create Account" screen
+                  // or be removed if account creation is handled elsewhere.
+                  // For now, it does nothing as the dialog is moved.
+                },
                 child: const Text('Criar nova conta'),
               ),
             ],
@@ -192,11 +149,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Adicionar nova conta',
-            onPressed: _showAddAccountDialog,
-          ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Configurações',

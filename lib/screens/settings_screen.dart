@@ -49,6 +49,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _showAddAccountDialog() async {
+    String newAccountName = '';
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nova Conta'),
+          content: TextField(
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'Nome da conta'),
+            onChanged: (value) {
+              newAccountName = value;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (newAccountName.trim().isNotEmpty) {
+                  final newAccount = Account(name: newAccountName.trim());
+                  await StorageService.addAccount(newAccount);
+                  await StorageService.setCurrentAccountId(newAccount.id);
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                } else {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('O nome da conta não pode ser vazio.'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Criar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void showMsg(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
@@ -121,6 +165,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(onPressed: _save, child: const Text('Salvar')),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _showAddAccountDialog,
+              child: const Text('Adicionar Nova Conta'),
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => _confirmClearAllAccountsData(context),
