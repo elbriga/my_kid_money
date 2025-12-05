@@ -32,14 +32,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void showMsg(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
-  Future<void> _confirmClearHistory(BuildContext context) async {
+  Future<void> _confirmClearAllAccountsData(BuildContext context) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirmar exclusão'),
+          title: const Text('Confirmar exclusão de dados'),
           content: const Text(
-            'Tem certeza que deseja apagar todo o histórico de transações?',
+            'Tem certeza que deseja apagar todas as contas e seus históricos de transações? Esta ação não pode ser desfeita.',
           ),
           actions: <Widget>[
             TextButton(
@@ -48,7 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Apagar'),
+              child: const Text('Apagar Tudo'),
             ),
           ],
         );
@@ -57,27 +57,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (confirm == true) {
       final ok = await BiometricService.authenticate(
-        "Confirme para Apagar os dados",
+        "Confirme para Apagar todos os dados",
       );
       if (!ok) return showMsg("Falha na autenticação");
 
-      await _clearHistory();
+      await _clearAllData();
     }
   }
 
-  Future<void> _clearHistory() async {
-    await StorageService.clearTransactions();
+  Future<void> _clearAllData() async {
+    await StorageService.clearAllAccountsData();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Histórico de transações apagado!')),
+        const SnackBar(content: Text('Todas as contas e históricos apagados!')),
       );
+      Navigator.pop(context); // Pop back to home screen which will reinitialize
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Configurar Nome')),
+      appBar: AppBar(title: const Text('Configurações')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -90,9 +91,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ElevatedButton(onPressed: _save, child: const Text('Salvar')),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => _confirmClearHistory(context),
+              onPressed: () => _confirmClearAllAccountsData(context),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Limpar Histórico'),
+              child: const Text('Apagar Todas as Contas e Históricos'),
             ),
           ],
         ),

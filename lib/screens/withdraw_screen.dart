@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/biometric_service.dart';
 import '../services/storage_service.dart';
 import '../models/transaction.dart';
+import '../models/account.dart'; // Added this import
 
 class WithdrawScreen extends StatefulWidget {
   const WithdrawScreen({super.key});
@@ -23,22 +24,30 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
     final desc = controllerDescricao.text;
 
-    final current = StorageService.getBalance();
-    if (value > current) return showMsg("Saldo insuficiente");
+    Account? currentAccount = await StorageService.getCurrentAccount();
+    if (currentAccount == null) {
+      showMsg(
+        "Nenhuma conta selecionada. Por favor, selecione ou crie uma conta.",
+      );
+      return;
+    }
+
+    if (value > currentAccount.balance) return showMsg("Saldo insuficiente");
 
     final ok = await BiometricService.authenticate("Confirme para sacar");
     if (!ok) return showMsg("Falha na autenticação");
 
-    final newBalance = current - value;
+    final newBalance = currentAccount.balance - value;
 
-    await StorageService.addTransaction(
-      AppTransaction(
-        value: -value,
-        timestamp: DateTime.now(),
-        balanceAfter: newBalance,
-        description: desc,
-      ),
+    final newTransaction = AppTransaction(
+      value: -value, // Withdrawal is a negative value
+      timestamp: DateTime.now(),
+      balanceAfter: newBalance,
+      description: desc,
     );
+
+    currentAccount.addTransaction(newTransaction);
+    await StorageService.updateAccount(currentAccount);
 
     if (mounted) Navigator.pop(context);
   }

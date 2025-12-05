@@ -3,6 +3,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 
 import '../models/transaction.dart';
+import '../models/account.dart';
 import '../services/biometric_service.dart';
 import '../services/storage_service.dart';
 
@@ -52,24 +53,32 @@ class _DepositScreenState extends State<DepositScreen> {
       return;
     }
 
+    Account? currentAccount = await StorageService.getCurrentAccount();
+    if (currentAccount == null) {
+      showMsg(
+        "Nenhuma conta selecionada. Por favor, selecione ou crie uma conta.",
+      );
+      return;
+    }
+
     // Play feedback
     _confettiController.play();
     _audioPlayer.play(AssetSource('audio/deposit.mp3'));
 
-    final current = StorageService.getBalance();
-    final newBalance = current + value;
+    final newBalance = currentAccount.balance + value;
 
-    await StorageService.addTransaction(
-      AppTransaction(
-        value: value,
-        timestamp: DateTime.now(),
-        balanceAfter: newBalance,
-        description: desc,
-      ),
+    final newTransaction = AppTransaction(
+      value: value,
+      timestamp: DateTime.now(),
+      balanceAfter: newBalance,
+      description: desc,
     );
 
+    currentAccount.addTransaction(newTransaction);
+    await StorageService.updateAccount(currentAccount);
+
     // Wait a bit for the user to see the animation
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 1500));
 
     if (mounted) Navigator.pop(context);
   }
