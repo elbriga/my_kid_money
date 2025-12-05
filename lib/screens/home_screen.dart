@@ -76,9 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_currentAccount == null) {
       // Fallback if no account could be loaded/created
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Conta Digital'),
-        ),
+        appBar: AppBar(title: const Text('Conta Digital')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -128,9 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 )
                               else
-                                const CircleAvatar(
-                                  child: Icon(Icons.person),
-                                ),
+                                const CircleAvatar(child: Icon(Icons.person)),
                               Padding(
                                 padding: const EdgeInsets.only(left: 8),
                                 child: Text(account.name),
@@ -195,9 +191,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           belowBarData: BarAreaData(show: false),
                         ),
                       ],
-                      titlesData: const FlTitlesData(show: false),
-                      borderData: FlBorderData(show: false),
-                      gridData: const FlGridData(show: false),
+                      titlesData: const FlTitlesData(show: true),
+                      borderData: FlBorderData(show: true),
+                      gridData: const FlGridData(show: true),
                       // Optional: customize axis titles for clarity
                       // leftTitles: AxisTitles(
                       //   sideTitles: SideTitles(showTitles: true, reservedSize: 40),
