@@ -210,6 +210,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () async {
+                      final ok = await BiometricService.authenticate(
+                        "Confirme para depositar",
+                      );
+                      if (!ok) {
+                        showMsg("Falha na autenticação");
+                        return;
+                      }
+
+                      if (!context.mounted) return;
+
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -225,6 +235,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () async {
+                      final ok = await BiometricService.authenticate(
+                        "Confirme para sacar",
+                      );
+                      if (!ok) {
+                        showMsg("Falha na autenticação");
+                        return;
+                      }
+
+                      if (!context.mounted) return;
+
                       await Navigator.push(
                         context,
                         MaterialPageRoute(

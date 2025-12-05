@@ -47,12 +47,6 @@ class _DepositScreenState extends State<DepositScreen> {
     }
     final desc = controllerDescricao.text;
 
-    final ok = await BiometricService.authenticate("Confirme para depositar");
-    if (!ok) {
-      showMsg("Falha na autenticação");
-      return;
-    }
-
     Account? currentAccount = await StorageService.getCurrentAccount();
     if (currentAccount == null) {
       showMsg(

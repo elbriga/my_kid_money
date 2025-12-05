@@ -34,9 +34,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
     if (value > currentAccount.balance) return showMsg("Saldo insuficiente");
 
-    final ok = await BiometricService.authenticate("Confirme para sacar");
-    if (!ok) return showMsg("Falha na autenticação");
-
     final newBalance = currentAccount.balance - value;
 
     final newTransaction = AppTransaction(
