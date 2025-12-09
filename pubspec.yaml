@@ -1,5 +1,5 @@
 name: my_kid_money
-version: 0.1.0+1
+version: 0.1.1+2
 description: Conta simulada para crianças
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
