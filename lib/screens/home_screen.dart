@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../theme/colors.dart';
 
 import 'deposit_screen.dart';
 import 'history_screen.dart';
@@ -188,11 +189,36 @@ class _HomeScreenState extends State<HomeScreen> {
                         LineChartBarData(
                           spots: spots,
                           isCurved: true,
-                          color: Theme.of(context).colorScheme.secondary,
+                          color: AppColors.primary,
+                          gradient: LinearGradient(
+                            colors: AppColors.chartGradient,
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
                           barWidth: 4,
                           isStrokeCapRound: true,
-                          dotData: const FlDotData(show: true),
-                          belowBarData: BarAreaData(show: false),
+                          dotData: FlDotData(
+                            show: true,
+                            getDotPainter: (spot, percent, barData, index) {
+                              return FlDotCirclePainter(
+                                radius: 4,
+                                color: AppColors.chartGradient[index % AppColors.chartGradient.length],
+                                strokeWidth: 2,
+                                strokeColor: AppColors.background,
+                              );
+                            },
+                          ),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.primary.withAlpha(77),
+                                AppColors.secondary.withAlpha(26),
+                              ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                          ),
                         ),
                       ],
                       titlesData: FlTitlesData(
@@ -245,67 +271,143 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final ok = await BiometricService.authenticate(
-                        "Confirme para depositar",
-                      );
-                      if (!ok) {
-                        showMsg("Falha na autenticação");
-                        return;
-                      }
-
-                      if (!context.mounted) return;
-
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const DepositScreen(),
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.depositGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.deposit.withAlpha(77),
+                          blurRadius: 8,
+                          offset: Offset(2, 2),
                         ),
-                      );
-                      _loadData();
-                    },
-                    child: const Text("Depositar"),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final ok = await BiometricService.authenticate(
+                          "Confirme para depositar",
+                        );
+                        if (!ok) {
+                          showMsg("Falha na autenticação");
+                          return;
+                        }
+
+                        if (!context.mounted) return;
+
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DepositScreen(),
+                          ),
+                        );
+                        _loadData();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: AppColors.textOnPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        textStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: const Text("Depositar"),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final ok = await BiometricService.authenticate(
-                        "Confirme para sacar",
-                      );
-                      if (!ok) {
-                        showMsg("Falha na autenticação");
-                        return;
-                      }
-
-                      if (!context.mounted) return;
-
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const WithdrawScreen(),
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.withdrawGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.withdraw.withAlpha(77),
+                          blurRadius: 8,
+                          offset: Offset(2, 2),
                         ),
-                      );
-                      _loadData();
-                    },
-                    child: const Text("Sacar"),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final ok = await BiometricService.authenticate(
+                          "Confirme para sacar",
+                        );
+                        if (!ok) {
+                          showMsg("Falha na autenticação");
+                          return;
+                        }
+
+                        if (!context.mounted) return;
+
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const WithdrawScreen(),
+                          ),
+                        );
+                        _loadData();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: AppColors.textOnPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        textStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: const Text("Sacar"),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const HistoryScreen(),
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.historyGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.history,
+                        width: 2,
+                      ),
+                    ),
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const HistoryScreen(),
+                          ),
+                        );
+                        _loadData();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.history,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                      _loadData();
-                    },
-                    child: const Text("Histórico"),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        textStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: const Text("Histórico"),
+                    ),
                   ),
                 ),
               ],

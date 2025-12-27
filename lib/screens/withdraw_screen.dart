@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/biometric_service.dart';
 import '../services/storage_service.dart';
 import '../models/transaction.dart';
 import '../models/account.dart'; // Added this import

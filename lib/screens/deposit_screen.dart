@@ -1,10 +1,10 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import '../theme/colors.dart';
 
 import '../models/transaction.dart';
 import '../models/account.dart';
-import '../services/biometric_service.dart';
 import '../services/storage_service.dart';
 
 class DepositScreen extends StatefulWidget {
@@ -115,13 +115,7 @@ class _DepositScreenState extends State<DepositScreen> {
             confettiController: _confettiController,
             blastDirectionality: BlastDirectionality.explosive,
             shouldLoop: false,
-            colors: const [
-              Colors.green,
-              Colors.blue,
-              Colors.pink,
-              Colors.orange,
-              Colors.purple,
-            ],
+            colors: AppColors.confettiColors,
           ),
         ),
       ],
