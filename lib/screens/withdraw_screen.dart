@@ -52,6 +52,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Sacar")),
+      backgroundColor: Colors.purple[50],
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

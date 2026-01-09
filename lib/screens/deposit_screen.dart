@@ -83,6 +83,7 @@ class _DepositScreenState extends State<DepositScreen> {
       children: [
         Scaffold(
           appBar: AppBar(title: const Text("Depositar")),
+          backgroundColor: Colors.purple[50],
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
