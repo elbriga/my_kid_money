@@ -57,6 +57,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            Image.asset('assets/icon/cifrao.png', height: 120, width: 120),
+            const SizedBox(height: 16),
             TextField(
               controller: controllerValor,
               decoration: const InputDecoration(labelText: "Valor"),
