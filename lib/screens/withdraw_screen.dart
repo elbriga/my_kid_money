@@ -63,13 +63,14 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 decimal: true,
               ),
             ),
+            const SizedBox(height: 16),
             TextField(
               controller: controllerDescricao,
               decoration: const InputDecoration(
                 labelText: "Descrição (opcional)",
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: doWithdraw,
               child: const Text("Confirmar"),
