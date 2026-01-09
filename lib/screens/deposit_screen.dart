@@ -87,6 +87,8 @@ class _DepositScreenState extends State<DepositScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
+                Image.asset('assets/icon/icon.png', height: 120, width: 120),
+                const SizedBox(height: 16),
                 TextField(
                   controller: controllerValor,
                   decoration: const InputDecoration(labelText: "Valor"),
