@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/transaction.dart';
 import '../theme/colors.dart';
 
@@ -14,36 +15,31 @@ class TransactionTile extends StatelessWidget {
         ? t.description
         : (isDeposit ? 'Depósito' : 'Saque');
 
-    // Format date - should use de intl package!
-    String data = t.timestamp.toString().split('.')[0];
-    String hora = data.split(' ')[1];
-    data = data.split(' ')[0];
-    String year = data.split('-')[0];
-    String month = data.split('-')[1];
-    String day = data.split('-')[2];
-
-    data = "$day/$month/$year $hora";
+    // Format date using the intl package
+    final String data = DateFormat('dd/MM/yyyy HH:mm').format(t.timestamp);
 
     // Get a playful color based on transaction amount
     Color getTransactionColor() {
       if (isDeposit) {
         // Use gradient of greens based on amount
         final amount = t.value.abs();
-        if (amount < 10) return AppColors.deposit.withAlpha(179);
-        if (amount < 50) return AppColors.deposit;
-        if (amount < 100) return AppColors.success;
+        if (amount < 100) return AppColors.deposit.withAlpha(179);
+        if (amount < 600) return AppColors.deposit;
+        if (amount < 700) return AppColors.success;
         return AppColors.secondary;
       } else {
         // Use gradient of oranges/reds based on amount
         final amount = t.value.abs();
-        if (amount < 10) return AppColors.withdraw.withAlpha(179);
-        if (amount < 50) return AppColors.withdraw;
-        if (amount < 100) return AppColors.warning;
+        if (amount < 30) return AppColors.withdraw.withAlpha(179);
+        if (amount < 100) return AppColors.withdraw;
+        if (amount < 400) return AppColors.warning;
         return AppColors.error;
       }
     }
 
-    final transactionColor = getTransactionColor();
+    final transactionColor = desc.toLowerCase().contains("mesada")
+        ? AppColors.primary
+        : getTransactionColor();
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -64,7 +60,7 @@ class TransactionTile extends StatelessWidget {
           foregroundColor: transactionColor,
           child: Text(
             sign,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
           ),
         ),
         title: Text(
@@ -72,13 +68,10 @@ class TransactionTile extends StatelessWidget {
           style: TextStyle(
             color: transactionColor,
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 18,
           ),
         ),
-        subtitle: Text(
-          desc,
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
+        subtitle: Text(desc, style: TextStyle(color: AppColors.textSecondary)),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -92,17 +85,12 @@ class TransactionTile extends StatelessWidget {
             ),
             Text(
               data,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 10,
-              ),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 10),
             ),
           ],
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
