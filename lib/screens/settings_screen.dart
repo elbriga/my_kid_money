@@ -101,15 +101,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void showMsg(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
-  Future<void> _confirmClearAllAccountsData(BuildContext context) async {
+  Future<void> _confirmDeleteAccount(BuildContext context) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmar exclusão de dados'),
-          content: const Text(
-            'Tem certeza que deseja apagar todas as contas e seus históricos de transações? Esta ação não pode ser desfeita.',
-          ),
+          content: const Text('Tem certeza que deseja apagar esta conta?'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -117,7 +115,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Apagar Tudo'),
+              child: const Text('Apagar'),
             ),
           ],
         );
@@ -130,16 +128,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
       if (!ok) return showMsg("Falha na autenticação");
 
-      await _clearAllData();
+      await _deleteAccount();
     }
   }
 
-  Future<void> _clearAllData() async {
-    await StorageService.clearAllAccountsData();
+  Future<void> _deleteAccount() async {
+    await StorageService.deleteAccount(widget.account.id);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Todas as contas e históricos apagados!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Conta apagada!')));
       Navigator.pop(context); // Pop back to home screen which will reinitialize
     }
   }
@@ -183,11 +181,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: _showAddAccountDialog,
               child: const Text('Adicionar Nova Conta'),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 60),
             ElevatedButton(
-              onPressed: () => _confirmClearAllAccountsData(context),
+              onPressed: () => _confirmDeleteAccount(context),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Apagar Todas as Contas e Históricos'),
+              child: const Text('Apagar Esta Conta'),
             ),
           ],
         ),
