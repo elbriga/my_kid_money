@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/account.dart';
+import '../models/transaction.dart';
 
 class StorageService {
   static late SharedPreferences _prefs;
@@ -103,5 +104,37 @@ class StorageService {
     // Optionally clear childName as well if it's tied to account data
     // await _prefs.remove(_childNameKey);
     await init(); // Reinitialize with a default account
+  }
+
+  static Future<void> initData() async {
+    final account = await getCurrentAccount();
+    if (account == null) {
+      return;
+    }
+
+    final transactions = [
+      [600.0, '2025-12-05', 'cache shopping São José'],
+      [100.0, '2025-12-06', 'mesada dezembro'],
+      [100.0, '2025-12-15', 'da vovó'],
+      [600.0, '2026-01-08', 'mesada janeiro'],
+      [600.0, '2026-01-10', 'Cache natal ssj 2'],
+    ];
+
+    var balance = 0.0;
+    for (var transaction in transactions) {
+      var value = transaction[0] as double;
+      balance += value;
+
+      final newTransaction = AppTransaction(
+        value: value,
+        timestamp: DateTime.parse('${transaction[1]} 12:00:00'),
+        balanceAfter: balance,
+        description: transaction[2] as String,
+      );
+
+      account.addTransaction(newTransaction);
+    }
+
+    await StorageService.updateAccount(account);
   }
 }
