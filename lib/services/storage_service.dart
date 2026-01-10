@@ -113,11 +113,11 @@ class StorageService {
     }
 
     final transactions = [
-      [600.0, '2025-12-05', 'cache shopping São José'],
-      [100.0, '2025-12-06', 'mesada dezembro'],
-      [100.0, '2025-12-15', 'da vovó'],
-      [600.0, '2026-01-08', 'mesada janeiro'],
-      [600.0, '2026-01-10', 'Cache natal ssj 2'],
+      [600.0, '2025-12-05 20:55', 'cache shopping São José'],
+      [100.0, '2025-12-06 21:00', 'mesada dezembro'],
+      [100.0, '2025-12-15 13:10', 'da vovó'],
+      [100.0, '2026-01-08 20:53', 'mesada janeiro'],
+      [700.0, '2026-01-10 14:30', 'Cache natal ssj 2'],
     ];
 
     var balance = 0.0;
@@ -127,7 +127,7 @@ class StorageService {
 
       final newTransaction = AppTransaction(
         value: value,
-        timestamp: DateTime.parse('${transaction[1]} 12:00:00'),
+        timestamp: DateTime.parse('${transaction[1]}:00'),
         balanceAfter: balance,
         description: transaction[2] as String,
       );
