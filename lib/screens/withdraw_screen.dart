@@ -21,6 +21,45 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     final value = double.tryParse(controllerValor.text.replaceAll(',', '.'));
     if (value == null || value <= 0) return showMsg("Valor inválido");
 
+    _showPasswordDialog(value);
+  }
+
+  Future<void> _showPasswordDialog(double value) async {
+    final passwordController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Digite a senha'),
+          content: TextField(
+            controller: passwordController,
+            obscureText: true,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Senha'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (passwordController.text == '1234') {
+                  Navigator.pop(context);
+                  _performWithdrawal(value);
+                } else {
+                  showMsg('Senha incorreta');
+                }
+              },
+              child: const Text('Confirmar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _performWithdrawal(double value) async {
     final desc = controllerDescricao.text;
 
     Account? currentAccount = await StorageService.getCurrentAccount();
