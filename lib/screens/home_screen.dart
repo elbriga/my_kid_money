@@ -202,7 +202,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             getDotPainter: (spot, percent, barData, index) {
                               return FlDotCirclePainter(
                                 radius: 4,
-                                color: AppColors.chartGradient[index % AppColors.chartGradient.length],
+                                color:
+                                    AppColors.chartGradient[index %
+                                        AppColors.chartGradient.length],
                                 strokeWidth: 2,
                                 strokeColor: AppColors.background,
                               );
@@ -338,16 +340,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: ElevatedButton(
                       onPressed: () async {
-                        final ok = await BiometricService.authenticate(
-                          "Confirme para sacar",
-                        );
-                        if (!ok) {
-                          showMsg("Falha na autenticação");
-                          return;
-                        }
-
-                        if (!context.mounted) return;
-
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -380,10 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: BoxDecoration(
                       gradient: AppColors.historyGradient,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.history,
-                        width: 2,
-                      ),
+                      border: Border.all(color: AppColors.history, width: 2),
                     ),
                     child: OutlinedButton(
                       onPressed: () async {
