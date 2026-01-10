@@ -21,10 +21,25 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     final value = double.tryParse(controllerValor.text.replaceAll(',', '.'));
     if (value == null || value <= 0) return showMsg("Valor inválido");
 
-    _showPasswordDialog(value);
+    final currentAccount = await StorageService.getCurrentAccount();
+    if (currentAccount == null) {
+      showMsg(
+        "Nenhuma conta selecionada. Por favor, selecione ou crie uma conta.",
+      );
+      return;
+    }
+
+    if (currentAccount.password?.isNotEmpty == true) {
+      _showPasswordDialog(value, currentAccount);
+    } else {
+      _performWithdrawal(value, currentAccount);
+    }
   }
 
-  Future<void> _showPasswordDialog(double value) async {
+  Future<void> _showPasswordDialog(
+    double value,
+    Account currentAccount,
+  ) async {
     final passwordController = TextEditingController();
     showDialog(
       context: context,
@@ -44,9 +59,13 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (passwordController.text == '1234') {
+                if (passwordController.text.isEmpty) {
+                  showMsg('Por favor, digite a senha');
+                  return;
+                }
+                if (passwordController.text == (currentAccount.password ?? '')) {
                   Navigator.pop(context);
-                  _performWithdrawal(value);
+                  _performWithdrawal(value, currentAccount);
                 } else {
                   showMsg('Senha incorreta');
                 }
@@ -59,16 +78,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
-  Future<void> _performWithdrawal(double value) async {
+  Future<void> _performWithdrawal(
+    double value,
+    Account currentAccount,
+  ) async {
     final desc = controllerDescricao.text;
-
-    Account? currentAccount = await StorageService.getCurrentAccount();
-    if (currentAccount == null) {
-      showMsg(
-        "Nenhuma conta selecionada. Por favor, selecione ou crie uma conta.",
-      );
-      return;
-    }
 
     if (value > currentAccount.balance) return showMsg("Saldo insuficiente");
 

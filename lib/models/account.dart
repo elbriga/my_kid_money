@@ -10,6 +10,7 @@ class Account {
   double balance;
   List<AppTransaction> transactions;
   String? imagePath;
+  String? password;
 
   Account({
     String? id,
@@ -17,6 +18,7 @@ class Account {
     this.balance = 0.0,
     List<AppTransaction>? transactions,
     this.imagePath,
+    this.password,
   })  : id = id ?? uuid.v4(),
         transactions = transactions ?? [];
 
@@ -29,6 +31,7 @@ class Account {
           .map((e) => AppTransaction.fromJson(e as Map<String, dynamic>))
           .toList(),
       imagePath: json['imagePath'] as String?,
+      password: json['password'] as String?,
     );
   }
 
@@ -39,6 +42,7 @@ class Account {
       'balance': balance,
       'transactions': transactions.map((e) => e.toJson()).toList(),
       'imagePath': imagePath,
+      'password': password,
     };
   }
 

@@ -18,6 +18,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _nameController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _imagePicker = ImagePicker();
   String? _imagePath;
 
@@ -26,10 +27,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     _nameController.text = widget.account.name;
     _imagePath = widget.account.imagePath;
+    _passwordController.text = widget.account.password ?? '';
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
     if (pickedFile != null) {
       setState(() {
         _imagePath = pickedFile.path;
@@ -40,6 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _save() async {
     widget.account.name = _nameController.text;
     widget.account.imagePath = _imagePath;
+    widget.account.password = _passwordController.text;
     await StorageService.updateAccount(widget.account);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -151,8 +156,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: _pickImage,
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage:
-                    _imagePath != null ? FileImage(File(_imagePath!)) : null,
+                backgroundImage: _imagePath != null
+                    ? FileImage(File(_imagePath!))
+                    : null,
                 child: _imagePath == null
                     ? const Icon(Icons.camera_alt, size: 50)
                     : null,
@@ -162,6 +168,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Nome da Conta'),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Senha de Saque'),
+              keyboardType: TextInputType.number,
+              obscureText: false,
             ),
             const SizedBox(height: 20),
             ElevatedButton(onPressed: _save, child: const Text('Salvar')),
