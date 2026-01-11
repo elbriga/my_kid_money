@@ -125,68 +125,62 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text("Sacar")),
-        backgroundColor: Colors.purple[50],
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (_currentAccount == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text("Sacar")),
-        backgroundColor: Colors.purple[50],
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Não foi possível carregar a conta.'),
-              ElevatedButton(
-                onPressed: () {
-                  _loadAccount();
-                },
-                child: const Text('Tentar novamente'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(title: const Text("Sacar")),
-      backgroundColor: Colors.purple[50],
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            BalanceCard(balance: _currentAccount!.balance),
-            const SizedBox(height: 16),
-            Image.asset('assets/icon/cifrao.png', height: 120, width: 120),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controllerValor,
-              decoration: const InputDecoration(labelText: "Valor"),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controllerDescricao,
-              decoration: const InputDecoration(
-                labelText: "Descrição (opcional)",
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: doWithdraw,
-              child: const Text("Confirmar"),
-            ),
-          ],
-        ),
+      appBar: AppBar(
+        title: const Text("Sacar", style: TextStyle(fontSize: 24)),
       ),
+      backgroundColor: Colors.purple[50],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _currentAccount == null
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Não foi possível carregar a conta.'),
+                  ElevatedButton(
+                    onPressed: () {
+                      _loadAccount();
+                    },
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  BalanceCard(balance: _currentAccount!.balance),
+                  const SizedBox(height: 16),
+                  Image.asset(
+                    'assets/icon/cifrao.png',
+                    height: 120,
+                    width: 120,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controllerValor,
+                    decoration: const InputDecoration(labelText: "Valor"),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controllerDescricao,
+                    decoration: const InputDecoration(
+                      labelText: "Descrição (opcional)",
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: doWithdraw,
+                    child: const Text("Confirmar"),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

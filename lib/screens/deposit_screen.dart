@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
@@ -156,7 +157,7 @@ class _DepositScreenState extends State<DepositScreen> {
                 ),
         ),
         Align(
-          alignment: Alignment.topCenter,
+          alignment: Alignment.center,
           child: ConfettiWidget(
             confettiController: _confettiController,
             blastDirectionality: BlastDirectionality.explosive,
