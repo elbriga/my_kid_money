@@ -405,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.history, width: 2),
                     ),
-                    child: OutlinedButton(
+                    child: ElevatedButton(
                       onPressed: () async {
                         await Navigator.push(
                           context,
@@ -415,7 +415,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                         _loadData();
                       },
-                      style: OutlinedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
                         foregroundColor: AppColors.history,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
