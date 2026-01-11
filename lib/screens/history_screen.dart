@@ -32,32 +32,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text("Histórico")),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
+    var transactions = [];
 
-    if (_currentAccount == null || _currentAccount!.transactions.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const Text("Histórico")),
-        body: const Center(
-          child: Text("Nenhuma transação encontrada para esta conta."),
-        ),
-      );
+    if (_currentAccount != null) {
+      // Sort transactions by timestamp in descending order (most recent first)
+      transactions = _currentAccount!.transactions.toList()
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     }
-
-    // Sort transactions by timestamp in descending order (most recent first)
-    final sortedTransactions = _currentAccount!.transactions.toList()
-      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     return Scaffold(
-      appBar: AppBar(title: Text("Histórico - ${_currentAccount!.name}")),
-      body: ListView.builder(
-        itemCount: sortedTransactions.length,
-        itemBuilder: (_, i) => TransactionTile(sortedTransactions[i]),
+      appBar: AppBar(
+        title: Text("Histórico", style: const TextStyle(fontSize: 24)),
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _currentAccount == null || _currentAccount!.transactions.isEmpty
+          ? const Center(
+              child: Text("Nenhuma transação encontrada para esta conta."),
+            )
+          : ListView.builder(
+              itemCount: transactions.length,
+              itemBuilder: (_, i) => TransactionTile(transactions[i]),
+            ),
     );
   }
 }

@@ -104,7 +104,9 @@ class _DepositScreenState extends State<DepositScreen> {
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(title: const Text("Depositar")),
+          appBar: AppBar(
+            title: const Text("Depositar", style: TextStyle(fontSize: 24)),
+          ),
           backgroundColor: Colors.purple[50],
           body: _isLoading
               ? const Center(child: CircularProgressIndicator())
