@@ -6,7 +6,6 @@ import 'theme/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageService.init();
-  //StorageService.initData();
   runApp(const MyApp());
 }
 

@@ -144,50 +144,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //StorageService.initData();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações da Conta')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: _imagePath != null
-                    ? FileImage(File(_imagePath!))
-                    : null,
-                child: _imagePath == null
-                    ? const Icon(Icons.camera_alt, size: 50)
-                    : null,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _pickImage,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _imagePath != null
+                      ? FileImage(File(_imagePath!))
+                      : null,
+                  child: _imagePath == null
+                      ? const Icon(Icons.camera_alt, size: 50)
+                      : null,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Nome da Conta'),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Senha de Saque'),
-              keyboardType: TextInputType.number,
-              obscureText: false,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: _save, child: const Text('Salvar')),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _showAddAccountDialog,
-              child: const Text('Adicionar Nova Conta'),
-            ),
-            const SizedBox(height: 60),
-            ElevatedButton(
-              onPressed: () => _confirmDeleteAccount(context),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Apagar Esta Conta'),
-            ),
-          ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Nome da Conta'),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Senha de Saque'),
+                keyboardType: TextInputType.number,
+                obscureText: false,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(onPressed: _save, child: const Text('Salvar')),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _showAddAccountDialog,
+                child: const Text('Adicionar Nova Conta'),
+              ),
+              const SizedBox(height: 60),
+              ElevatedButton(
+                onPressed: () => _confirmDeleteAccount(context),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Apagar Esta Conta'),
+              ),
+            ],
+          ),
         ),
       ),
     );

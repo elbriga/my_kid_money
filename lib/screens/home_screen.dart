@@ -106,10 +106,28 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
     ];
 
+    Widget getHeaderItem(Account account) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (account.imagePath != null)
+            CircleAvatar(backgroundImage: FileImage(File(account.imagePath!)))
+          else
+            const CircleAvatar(child: Icon(Icons.person)),
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Text(account.name),
+          ),
+        ],
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: _accounts.isEmpty
             ? const Text('Conta Digital')
+            : _accounts.length == 1
+            ? getHeaderItem(_accounts[0])
             : DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _currentAccount!.id,
@@ -122,22 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       .map(
                         (account) => DropdownMenuItem(
                           value: account.id,
-                          child: Row(
-                            children: [
-                              if (account.imagePath != null)
-                                CircleAvatar(
-                                  backgroundImage: FileImage(
-                                    File(account.imagePath!),
-                                  ),
-                                )
-                              else
-                                const CircleAvatar(child: Icon(Icons.person)),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: Text(account.name),
-                              ),
-                            ],
-                          ),
+                          child: getHeaderItem(account),
                         ),
                       )
                       .toList(),
@@ -177,7 +180,16 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            BalanceCard(balance: _currentAccount!.balance),
+            GestureDetector(
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                );
+                _loadData(); // Refresh data after returning from history
+              },
+              child: BalanceCard(balance: _currentAccount!.balance),
+            ),
             const SizedBox(height: 16),
             if (spots.length > 1)
               Expanded(
