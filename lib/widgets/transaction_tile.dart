@@ -44,7 +44,7 @@ class TransactionTile extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: isDeposit ? Colors.green.shade100 : Colors.red.shade100,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
