@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_kid_money/widgets/balance_card.dart';
 import '../services/storage_service.dart';
 import '../models/transaction.dart';
 import '../models/account.dart'; // Added this import
@@ -14,8 +15,37 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   final controllerValor = TextEditingController();
   final controllerDescricao = TextEditingController();
 
+  Account? _currentAccount;
+  bool _isLoading = true;
+
   void showMsg(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+
+  @override
+  @override
+  void initState() {
+    super.initState();
+    _loadAccount();
+  }
+
+  Future<void> _loadAccount() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      _currentAccount = await StorageService.getCurrentAccount();
+    } catch (e) {
+      showMsg("Erro ao carregar conta");
+      setState(() {
+        _isLoading = false;
+        _currentAccount = null;
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   Future<void> doWithdraw() async {
     final value = double.tryParse(controllerValor.text.replaceAll(',', '.'));
@@ -36,10 +66,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     }
   }
 
-  Future<void> _showPasswordDialog(
-    double value,
-    Account currentAccount,
-  ) async {
+  Future<void> _showPasswordDialog(double value, Account currentAccount) async {
     final passwordController = TextEditingController();
     showDialog(
       context: context,
@@ -63,7 +90,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   showMsg('Por favor, digite a senha');
                   return;
                 }
-                if (passwordController.text == (currentAccount.password ?? '')) {
+                if (passwordController.text ==
+                    (currentAccount.password ?? '')) {
                   Navigator.pop(context);
                   _performWithdrawal(value, currentAccount);
                 } else {
@@ -78,10 +106,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
-  Future<void> _performWithdrawal(
-    double value,
-    Account currentAccount,
-  ) async {
+  Future<void> _performWithdrawal(double value, Account currentAccount) async {
     final desc = controllerDescricao.text;
 
     if (value > currentAccount.balance) return showMsg("Saldo insuficiente");
@@ -103,6 +128,35 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Sacar")),
+        backgroundColor: Colors.purple[50],
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_currentAccount == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Sacar")),
+        backgroundColor: Colors.purple[50],
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Não foi possível carregar a conta.'),
+              ElevatedButton(
+                onPressed: () {
+                  _loadAccount();
+                },
+                child: const Text('Tentar novamente'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text("Sacar")),
       backgroundColor: Colors.purple[50],
@@ -110,6 +164,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            BalanceCard(balance: _currentAccount!.balance),
+            const SizedBox(height: 16),
             Image.asset('assets/icon/cifrao.png', height: 120, width: 120),
             const SizedBox(height: 16),
             TextField(
