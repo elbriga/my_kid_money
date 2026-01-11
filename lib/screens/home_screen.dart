@@ -116,7 +116,13 @@ class _HomeScreenState extends State<HomeScreen> {
             const CircleAvatar(child: Icon(Icons.person)),
           Padding(
             padding: const EdgeInsets.only(left: 8),
-            child: Text(account.name),
+            child: Text(
+              account.name,
+              style: const TextStyle(
+                fontSize: 20,
+                color: AppColors.textOnPrimary,
+              ),
+            ),
           ),
         ],
       );
