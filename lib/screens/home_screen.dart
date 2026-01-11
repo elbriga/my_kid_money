@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: _accounts.isEmpty
             ? const Text('Conta Digital')
             : _accounts.length == 1
-            ? getHeaderItem(_accounts[0])
+            ? getHeaderItem(_currentAccount!)
             : DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _currentAccount!.id,

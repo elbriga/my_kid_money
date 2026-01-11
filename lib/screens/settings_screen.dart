@@ -80,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   await StorageService.addAccount(newAccount);
                   await StorageService.setCurrentAccountId(newAccount.id);
                   if (!context.mounted) return;
-                  Navigator.pop(context);
+                  Navigator.popUntil(context, (route) => route.isFirst);
                 } else {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
