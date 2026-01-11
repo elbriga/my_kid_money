@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:my_kid_money/widgets/balance_card.dart';
 import '../theme/colors.dart';
 
 import '../models/transaction.dart';
@@ -20,13 +21,33 @@ class _DepositScreenState extends State<DepositScreen> {
   late ConfettiController _confettiController;
   late AudioPlayer _audioPlayer;
 
+  Account? _currentAccount;
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
+    _loadAccount();
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 4),
     );
     _audioPlayer = AudioPlayer();
+  }
+
+  Future<void> _loadAccount() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      _currentAccount = await StorageService.getCurrentAccount();
+    } catch (e) {
+      showMsg("Erro ao carregar conta: $e");
+      _currentAccount = null;
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -84,34 +105,55 @@ class _DepositScreenState extends State<DepositScreen> {
         Scaffold(
           appBar: AppBar(title: const Text("Depositar")),
           backgroundColor: Colors.purple[50],
-          body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Image.asset('assets/icon/icon.png', height: 120, width: 120),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: controllerValor,
-                  decoration: const InputDecoration(labelText: "Valor"),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _currentAccount == null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Não foi possível carregar a conta.'),
+                      ElevatedButton(
+                        onPressed: _loadAccount,
+                        child: const Text('Tentar Novamente'),
+                      ),
+                    ],
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      BalanceCard(balance: _currentAccount!.balance),
+                      const SizedBox(height: 16),
+                      Image.asset(
+                        'assets/icon/icon.png',
+                        height: 120,
+                        width: 120,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: controllerValor,
+                        decoration: const InputDecoration(labelText: "Valor"),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: controllerDescricao,
+                        decoration: const InputDecoration(
+                          labelText: "Descrição (opcional)",
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: doDeposit,
+                        child: const Text("Confirmar"),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: controllerDescricao,
-                  decoration: const InputDecoration(
-                    labelText: "Descrição (opcional)",
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: doDeposit,
-                  child: const Text("Confirmar"),
-                ),
-              ],
-            ),
-          ),
         ),
         Align(
           alignment: Alignment.topCenter,

@@ -36,10 +36,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       _currentAccount = await StorageService.getCurrentAccount();
     } catch (e) {
       showMsg("Erro ao carregar conta");
-      setState(() {
-        _isLoading = false;
-        _currentAccount = null;
-      });
+      _currentAccount = null;
     } finally {
       setState(() {
         _isLoading = false;
