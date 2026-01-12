@@ -34,6 +34,8 @@ class AppColors {
   static const Color error = Color(0xFFF44336);
   static const Color info = Color(0xFF2196F3);
 
+  static const Color highDollar = Color(0xFF2C7F30);
+
   // Chart colors
   static const List<Color> chartGradient = [
     Color(0xFF6C63FF),
@@ -62,6 +64,12 @@ class AppColors {
     colors: [primary, secondary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+  );
+
+  static Gradient backgroundGradient = LinearGradient(
+    colors: [Colors.purple.shade100, background],
+    begin: Alignment.bottomCenter,
+    end: Alignment.topCenter,
   );
 
   static Gradient secondaryGradient = LinearGradient(

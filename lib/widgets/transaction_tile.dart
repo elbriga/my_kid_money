@@ -26,7 +26,7 @@ class TransactionTile extends StatelessWidget {
         if (amount < 100) return AppColors.deposit.withAlpha(179);
         if (amount < 600) return AppColors.deposit;
         if (amount < 700) return AppColors.success;
-        return AppColors.secondary;
+        return AppColors.highDollar;
       } else {
         // Use gradient of oranges/reds based on amount
         final amount = t.value.abs();
