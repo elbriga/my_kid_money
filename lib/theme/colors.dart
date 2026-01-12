@@ -14,7 +14,7 @@ class AppColors {
   // Accent colors for different actions
   static const Color deposit = Color(0xFF4CAF50); // Green
   static const Color withdraw = Color(0xFFFF9800); // Orange
-  static const Color history = Color(0xFFf1f6F3); // Blue
+  static const Color history = Color(0xFFA1A6E3); // Blue
   static const Color settings = Color(0xFF9C27B0); // Purple
 
   // Background colors
