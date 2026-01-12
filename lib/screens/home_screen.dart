@@ -206,10 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Button(
                     caption: 'Depositar',
                     gradient: AppColors.depositGradient,
-                    onPressed: () => gotoScreen(
-                      screen: const DepositScreen(),
-                      authMsg: 'Confirme para depositar',
-                    ),
+                    onPressed: () => gotoScreen(screen: const DepositScreen()),
                   ),
                   const SizedBox(width: 8),
                   Button(

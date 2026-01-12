@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 
+import '../services/biometric_service.dart';
 import '../theme/colors.dart';
 import '../widgets/balance_card.dart';
 import '../models/transaction.dart';
@@ -67,6 +68,9 @@ class _DepositScreenState extends State<DepositScreen> {
       return;
     }
     final desc = controllerDescricao.text;
+
+    final ok = await BiometricService.authenticate("Confirme para Depositar");
+    if (!ok) return showMsg("Falha na autenticação");
 
     Account? currentAccount = await StorageService.getCurrentAccount();
     if (currentAccount == null) {
