@@ -152,12 +152,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  BalanceCard(balance: _currentAccount!.balance),
-                  const SizedBox(height: 16),
-                  Image.asset(
-                    'assets/icon/cifrao.png',
-                    height: 120,
-                    width: 120,
+                  BalanceCard(
+                    balance: _currentAccount!.balance,
+                    icon: 'cifrao',
                   ),
                   const SizedBox(height: 16),
                   TextField(

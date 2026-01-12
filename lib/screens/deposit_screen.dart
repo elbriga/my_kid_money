@@ -128,12 +128,6 @@ class _DepositScreenState extends State<DepositScreen> {
                     children: [
                       BalanceCard(balance: _currentAccount!.balance),
                       const SizedBox(height: 16),
-                      Image.asset(
-                        'assets/icon/icon.png',
-                        height: 120,
-                        width: 120,
-                      ),
-                      const SizedBox(height: 16),
                       TextField(
                         controller: controllerValor,
                         decoration: const InputDecoration(labelText: "Valor"),

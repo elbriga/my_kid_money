@@ -4,11 +4,13 @@ import '../theme/colors.dart';
 
 class BalanceCard extends StatelessWidget {
   final double balance;
-  const BalanceCard({super.key, required this.balance});
+  final String? icon;
+  const BalanceCard({super.key, required this.balance, this.icon});
 
   @override
   Widget build(BuildContext context) {
     final isPositive = balance >= 0;
+    final iconPath = 'assets/icon/${icon == null ? 'icon' : icon!}.png';
 
     return Card(
       elevation: 8,
@@ -57,11 +59,7 @@ class BalanceCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Icon(
-                isPositive ? Icons.savings : Icons.money_off,
-                size: 50,
-                color: AppColors.textOnPrimary,
-              ),
+              Image.asset(iconPath, width: 64, height: 64),
             ],
           ),
         ),
