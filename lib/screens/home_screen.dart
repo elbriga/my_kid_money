@@ -3,16 +3,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import '../theme/colors.dart';
 
 import 'deposit_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
 import 'withdraw_screen.dart';
+import '../theme/colors.dart';
 import '../models/account.dart';
 import '../services/storage_service.dart';
 import '../services/biometric_service.dart';
 import '../widgets/balance_card.dart';
+import '../widgets/button.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -182,265 +183,190 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                );
-                _loadData(); // Refresh data after returning from history
-              },
-              child: BalanceCard(balance: _currentAccount!.balance),
-            ),
-            const SizedBox(height: 16),
-            if (spots.length > 1)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: LineChart(
-                    LineChartData(
-                      lineTouchData: LineTouchData(
-                        touchTooltipData: LineTouchTooltipData(
-                          getTooltipItems: (touchedSpots) {
-                            return touchedSpots.map((touchedSpot) {
-                              return LineTooltipItem(
-                                NumberFormat.currency(
-                                  locale: 'pt_BR',
-                                  symbol: 'R\$',
-                                ).format(touchedSpot.y),
-                                const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              );
-                            }).toList();
-                          },
-                        ),
-                      ),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: spots,
-                          isCurved: true,
-                          color: AppColors.primary,
-                          gradient: LinearGradient(
-                            colors: AppColors.chartGradient,
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                          barWidth: 4,
-                          isStrokeCapRound: true,
-                          dotData: FlDotData(
-                            show: true,
-                            getDotPainter: (spot, percent, barData, index) {
-                              return FlDotCirclePainter(
-                                radius: 4,
-                                color:
-                                    AppColors.chartGradient[index %
-                                        AppColors.chartGradient.length],
-                                strokeWidth: 2,
-                                strokeColor: AppColors.background,
-                              );
+      body: Container(
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                  );
+                  _loadData(); // Refresh data after returning from history
+                },
+                child: BalanceCard(balance: _currentAccount!.balance),
+              ),
+              const SizedBox(height: 16),
+              if (spots.length > 1)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: LineChart(
+                      LineChartData(
+                        lineTouchData: LineTouchData(
+                          touchTooltipData: LineTouchTooltipData(
+                            getTooltipItems: (touchedSpots) {
+                              return touchedSpots.map((touchedSpot) {
+                                return LineTooltipItem(
+                                  NumberFormat.currency(
+                                    locale: 'pt_BR',
+                                    symbol: 'R\$',
+                                  ).format(touchedSpot.y),
+                                  const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                );
+                              }).toList();
                             },
                           ),
-                          belowBarData: BarAreaData(
-                            show: true,
+                        ),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: spots,
+                            isCurved: true,
+                            color: AppColors.primary,
                             gradient: LinearGradient(
-                              colors: [
-                                AppColors.primary.withAlpha(77),
-                                AppColors.secondary.withAlpha(26),
-                              ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
+                              colors: AppColors.chartGradient,
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            barWidth: 4,
+                            isStrokeCapRound: true,
+                            dotData: FlDotData(
+                              show: true,
+                              getDotPainter: (spot, percent, barData, index) {
+                                return FlDotCirclePainter(
+                                  radius: 4,
+                                  color:
+                                      AppColors.chartGradient[index %
+                                          AppColors.chartGradient.length],
+                                  strokeWidth: 2,
+                                  strokeColor: AppColors.background,
+                                );
+                              },
+                            ),
+                            belowBarData: BarAreaData(
+                              show: true,
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.primary.withAlpha(77),
+                                  AppColors.secondary.withAlpha(26),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                          ),
+                        ],
+                        titlesData: FlTitlesData(
+                          show: true,
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval: spots.length > 1
+                                  ? (spots.last.x - spots.first.x) / 4
+                                  : 1,
+                              getTitlesWidget: (value, meta) {
+                                final timestamp =
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                      value.toInt(),
+                                    );
+                                final formattedDate = DateFormat(
+                                  'dd/MM\nHH:mm',
+                                ).format(timestamp);
+                                return SideTitleWidget(
+                                  meta: meta,
+                                  // axisSide: meta.axisSide,
+                                  child: Text(
+                                    formattedDate,
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          leftTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
                             ),
                           ),
                         ),
-                      ],
-                      titlesData: FlTitlesData(
-                        show: true,
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 40,
-                            interval: spots.length > 1
-                                ? (spots.last.x - spots.first.x) / 4
-                                : 1,
-                            getTitlesWidget: (value, meta) {
-                              final timestamp =
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                    value.toInt(),
-                                  );
-                              final formattedDate = DateFormat(
-                                'dd/MM\nHH:mm',
-                              ).format(timestamp);
-                              return SideTitleWidget(
-                                meta: meta,
-                                // axisSide: meta.axisSide,
-                                child: Text(
-                                  formattedDate,
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        leftTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 40,
-                          ),
-                        ),
+                        borderData: FlBorderData(show: true),
+                        gridData: const FlGridData(show: true),
                       ),
-                      borderData: FlBorderData(show: true),
-                      gridData: const FlGridData(show: true),
                     ),
                   ),
                 ),
+              Row(
+                children: [
+                  Button(
+                    caption: 'Depositar',
+                    gradient: AppColors.depositGradient,
+                    onPressed: () async {
+                      final ok = await BiometricService.authenticate(
+                        "Confirme para depositar",
+                      );
+                      if (!ok) {
+                        showMsg("Falha na autenticação");
+                        return;
+                      }
+
+                      if (!context.mounted) return;
+
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DepositScreen(),
+                        ),
+                      );
+                      _loadData();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  Button(
+                    caption: 'Sacar',
+                    gradient: AppColors.withdrawGradient,
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WithdrawScreen(),
+                        ),
+                      );
+                      _loadData();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  Button(
+                    caption: 'Histórico',
+                    gradient: AppColors.historyGradient,
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HistoryScreen(),
+                        ),
+                      );
+                      _loadData();
+                    },
+                  ),
+                ],
               ),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.depositGradient,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.deposit.withAlpha(77),
-                          blurRadius: 8,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final ok = await BiometricService.authenticate(
-                          "Confirme para depositar",
-                        );
-                        if (!ok) {
-                          showMsg("Falha na autenticação");
-                          return;
-                        }
-
-                        if (!context.mounted) return;
-
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const DepositScreen(),
-                          ),
-                        );
-                        _loadData();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        foregroundColor: AppColors.textOnPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        textStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      child: const Text("Depositar"),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.withdrawGradient,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.withdraw.withAlpha(77),
-                          blurRadius: 8,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const WithdrawScreen(),
-                          ),
-                        );
-                        _loadData();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        foregroundColor: AppColors.textOnPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        textStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      child: const Text("Sacar"),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.historyGradient,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.history, width: 2),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const HistoryScreen(),
-                          ),
-                        );
-                        _loadData();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        foregroundColor: AppColors.history,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        textStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      child: const Text("Histórico"),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
