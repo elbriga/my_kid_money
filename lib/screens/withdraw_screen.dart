@@ -174,7 +174,14 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: doWithdraw,
-                    child: const Text("Confirmar"),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Confirmar"),
+                        SizedBox(width: 16),
+                        Icon(Icons.keyboard_alt),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -149,7 +149,14 @@ class _DepositScreenState extends State<DepositScreen> {
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: doDeposit,
-                        child: const Text("Confirmar"),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Confirmar"),
+                            SizedBox(width: 16),
+                            Icon(Icons.fingerprint),
+                          ],
+                        ),
                       ),
                     ],
                   ),
