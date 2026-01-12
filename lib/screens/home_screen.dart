@@ -128,6 +128,26 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
+    Future<bool> auth(String msg) async {
+      final ok = await BiometricService.authenticate(msg);
+      if (!ok) {
+        showMsg("Falha na autenticação");
+      }
+      return ok;
+    }
+
+    Future<void> gotoScreen({
+      required StatefulWidget screen,
+      String? authMsg,
+    }) async {
+      if (authMsg != null) {
+        if (!await auth("Confirme para depositar")) return;
+        if (!context.mounted) return;
+      }
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+      _loadData();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: _accounts.isEmpty
@@ -162,23 +182,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Configurações',
-            onPressed: () async {
-              final ok = await BiometricService.authenticate(
-                "Confirme sua identidade!",
-              );
-              if (!ok) return showMsg("Falha na autenticação");
-
-              if (!context.mounted) return;
-
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SettingsScreen(account: _currentAccount!),
-                ),
-              );
-
-              _loadData(); // Refresh data after returning from settings
-            },
+            onPressed: () => gotoScreen(
+              screen: SettingsScreen(account: _currentAccount!),
+              authMsg: "Confirme sua identidade!",
+            ),
           ),
         ],
       ),
@@ -189,13 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               GestureDetector(
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                  );
-                  _loadData(); // Refresh data after returning from history
-                },
+                onTap: () => gotoScreen(screen: const HistoryScreen()),
                 child: BalanceCard(balance: _currentAccount!.balance),
               ),
               const SizedBox(height: 16),
@@ -205,53 +206,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   Button(
                     caption: 'Depositar',
                     gradient: AppColors.depositGradient,
-                    onPressed: () async {
-                      final ok = await BiometricService.authenticate(
-                        "Confirme para depositar",
-                      );
-                      if (!ok) {
-                        showMsg("Falha na autenticação");
-                        return;
-                      }
-
-                      if (!context.mounted) return;
-
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const DepositScreen(),
-                        ),
-                      );
-                      _loadData();
-                    },
+                    onPressed: () => gotoScreen(
+                      screen: const DepositScreen(),
+                      authMsg: 'Confirme para depositar',
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Button(
                     caption: 'Sacar',
                     gradient: AppColors.withdrawGradient,
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const WithdrawScreen(),
-                        ),
-                      );
-                      _loadData();
-                    },
+                    onPressed: () => gotoScreen(screen: const WithdrawScreen()),
                   ),
                   const SizedBox(width: 8),
                   Button(
                     caption: 'Histórico',
                     gradient: AppColors.historyGradient,
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const HistoryScreen(),
-                        ),
-                      );
-                      _loadData();
-                    },
+                    onPressed: () => gotoScreen(screen: const HistoryScreen()),
                   ),
                 ],
               ),
