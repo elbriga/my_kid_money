@@ -21,6 +21,45 @@ class StorageService {
       await _prefs.setString(_currentAccountIdKey, defaultAccount.id);
     }
     _prefs.setString(_childNameKey, _prefs.getString(_childNameKey) ?? '');
+
+    final accounts = await _loadAllAccounts();
+    for (final account in accounts) {
+      await _applyInterest(account);
+    }
+  }
+
+  static Future<void> _applyInterest(Account account) async {
+    if (account.tax == null || account.tax! <= 0) {
+      return;
+    }
+
+    final now = DateTime.now();
+    DateTime lastInterestDate = account.lastInterestDate ?? now;
+
+    if (now.isBefore(lastInterestDate.add(const Duration(days: 30)))) {
+      return;
+    }
+
+    final monthsPassed =
+        (now.year - lastInterestDate.year) * 12 +
+        now.month -
+        lastInterestDate.month;
+
+    if (monthsPassed <= 0) {
+      return;
+    }
+
+    double interest = account.balance * (account.tax! / 100) * monthsPassed;
+
+    final newTransaction = AppTransaction(
+      value: interest,
+      description: 'Juros mensal',
+      balanceAfter: account.balance + interest,
+      timestamp: now,
+    );
+    account.addTransaction(newTransaction);
+    account.lastInterestDate = now;
+    await updateAccount(account);
   }
 
   static Future<List<Account>> _loadAllAccounts() async {

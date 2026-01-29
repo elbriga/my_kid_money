@@ -12,6 +12,7 @@ class Account {
   String? imagePath;
   String? password;
   double? tax;
+  DateTime? lastInterestDate;
 
   Account({
     String? id,
@@ -21,8 +22,9 @@ class Account {
     this.imagePath,
     this.password,
     this.tax,
-  }) : id = id ?? uuid.v4(),
-       transactions = transactions ?? [];
+    this.lastInterestDate,
+  })  : id = id ?? uuid.v4(),
+        transactions = transactions ?? [];
 
   factory Account.fromJson(Map<String, dynamic> json) {
     return Account(
@@ -35,6 +37,9 @@ class Account {
       imagePath: json['imagePath'] as String?,
       password: json['password'] as String?,
       tax: json['tax'] as double?,
+      lastInterestDate: json['lastInterestDate'] != null
+          ? DateTime.parse(json['lastInterestDate'] as String)
+          : null,
     );
   }
 
@@ -47,11 +52,13 @@ class Account {
       'imagePath': imagePath,
       'password': password,
       'tax': tax,
+      'lastInterestDate': lastInterestDate?.toIso8601String(),
     };
   }
 
   void addTransaction(AppTransaction transaction) {
     transactions.add(transaction);
+    transactions.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     balance += transaction.value;
   }
 }
