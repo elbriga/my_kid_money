@@ -18,6 +18,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _taxController = TextEditingController();
   final _imagePicker = ImagePicker();
   String? _imagePath;
 
@@ -27,6 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _nameController.text = widget.account.name;
     _imagePath = widget.account.imagePath;
     _passwordController.text = widget.account.password ?? '';
+    _taxController.text = widget.account.tax?.toString() ?? "0.0";
   }
 
   Future<void> _pickImage() async {
@@ -44,7 +46,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     widget.account.name = _nameController.text;
     widget.account.imagePath = _imagePath;
     widget.account.password = _passwordController.text;
+    widget.account.tax = double.tryParse(_taxController.text);
     await StorageService.updateAccount(widget.account);
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta atualizada com sucesso!')),
@@ -177,13 +181,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 obscureText: false,
               ),
               const SizedBox(height: 20),
-              ElevatedButton(onPressed: _save, child: const Text('Salvar')),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _taxController,
+                      decoration: const InputDecoration(
+                        labelText: 'Juros Mensais',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Text('%'),
+                  const SizedBox(width: 50),
+                ],
+              ),
               const SizedBox(height: 20),
+              ElevatedButton(onPressed: _save, child: const Text('Salvar')),
+              const SizedBox(height: 60),
               ElevatedButton(
                 onPressed: _showAddAccountDialog,
                 child: const Text('Adicionar Nova Conta'),
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => _confirmDeleteAccount(context),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
