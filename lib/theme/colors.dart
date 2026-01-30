@@ -35,6 +35,7 @@ class AppColors {
   static const Color info = Color(0xFF2196F3);
 
   static const Color highDollar = Color(0xFF2C7F30);
+  static const Color interests = Colors.blue;
 
   // Chart colors
   static const List<Color> chartGradient = [

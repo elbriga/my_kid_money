@@ -15,13 +15,19 @@ class TransactionTile extends StatelessWidget {
     final desc = t.description != ''
         ? t.description
         : (isDeposit ? 'Depósito' : 'Saque');
+    final isMesada = desc.toLowerCase().contains("mesada");
+    final isJuros = desc.toLowerCase().startsWith("juros");
 
     // Format date using the intl package
     final String data = DateFormat('dd/MM/yyyy HH:mm').format(t.timestamp);
 
     // Get a playful color based on transaction amount
     Color getTransactionColor() {
-      if (isDeposit) {
+      if (isMesada) {
+        return AppColors.primary;
+      } else if (isJuros) {
+        return AppColors.interests;
+      } else if (isDeposit) {
         // Use gradient of greens based on amount
         final amount = t.value.abs();
         if (amount < 100) return AppColors.deposit.withAlpha(179);
@@ -38,14 +44,23 @@ class TransactionTile extends StatelessWidget {
       }
     }
 
-    final transactionColor = desc.toLowerCase().contains("mesada")
-        ? AppColors.primary
-        : getTransactionColor();
+    final transactionColor = getTransactionColor();
+
+    Color getTileColor() {
+      // TODO :: add to AppColors
+      return isJuros
+          ? Colors.yellow.shade100
+          : isDeposit
+          ? Colors.green.shade100
+          : Colors.red.shade100;
+    }
+
+    final tileColor = getTileColor();
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(
-        color: isDeposit ? Colors.green.shade100 : Colors.red.shade100,
+        color: tileColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

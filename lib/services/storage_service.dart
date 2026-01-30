@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/account.dart';
@@ -47,13 +48,17 @@ class StorageService {
       lastInterestDate = DateTime(
         lastInterestDate.year,
         lastInterestDate.month + 1,
-        lastInterestDate.day,
+        1,
+        0,
+        0,
+        0,
       );
 
       // Create a new transaction for the interest
       final newTransaction = AppTransaction(
         value: interest,
-        description: 'Juros mensal',
+        description:
+            'Juros ${account.tax} % ${DateFormat('MMMM yyyy', 'pt_BR').format(lastInterestDate)}',
         balanceAfter: account.balance + interest,
         timestamp: lastInterestDate,
       );
@@ -161,8 +166,10 @@ class StorageService {
       [600.0, '2025-12-05 20:55', 'cache shopping São José'],
       [100.0, '2025-12-06 21:00', 'mesada dezembro'],
       [100.0, '2025-12-15 13:10', 'da vovó'],
+      [16.0, '2026-01-01 00:00', 'Juros 2.0 % janeiro 2026'],
       [100.0, '2026-01-08 20:53', 'mesada janeiro'],
       [700.0, '2026-01-10 14:30', 'Cache natal ssj 2'],
+      [-25.0, '2026-01-11 17:11', 'sorvete Lálika'],
     ];
 
     var balance = 0.0;
