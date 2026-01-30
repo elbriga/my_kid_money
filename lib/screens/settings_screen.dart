@@ -46,7 +46,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     widget.account.name = _nameController.text;
     widget.account.imagePath = _imagePath;
     widget.account.password = _passwordController.text;
-    widget.account.tax = double.tryParse(_taxController.text);
+    widget.account.tax = double.tryParse(
+      _taxController.text.replaceAll(',', '.'),
+    );
     await StorageService.updateAccount(widget.account);
 
     if (mounted) {
