@@ -36,29 +36,34 @@ class StorageService {
     final now = DateTime.now();
     DateTime lastInterestDate = account.lastInterestDate ?? now;
 
-    if (now.isBefore(lastInterestDate.add(const Duration(days: 30)))) {
-      return;
+    // Loop through each month since the last interest application
+    while (lastInterestDate.year < now.year ||
+        (lastInterestDate.year == now.year &&
+            lastInterestDate.month < now.month)) {
+      // Calculate interest for one month
+      final interest = account.balance * (account.tax! / 100);
+
+      // Move to the next month
+      lastInterestDate = DateTime(
+        lastInterestDate.year,
+        lastInterestDate.month + 1,
+        lastInterestDate.day,
+      );
+
+      // Create a new transaction for the interest
+      final newTransaction = AppTransaction(
+        value: interest,
+        description: 'Juros mensal',
+        balanceAfter: account.balance + interest,
+        timestamp: lastInterestDate,
+      );
+
+      // Add the transaction and update the account's last interest date
+      account.addTransaction(newTransaction);
+      account.lastInterestDate = lastInterestDate;
     }
 
-    final monthsPassed =
-        (now.year - lastInterestDate.year) * 12 +
-        now.month -
-        lastInterestDate.month;
-
-    if (monthsPassed <= 0) {
-      return;
-    }
-
-    double interest = account.balance * (account.tax! / 100) * monthsPassed;
-
-    final newTransaction = AppTransaction(
-      value: interest,
-      description: 'Juros mensal',
-      balanceAfter: account.balance + interest,
-      timestamp: now,
-    );
-    account.addTransaction(newTransaction);
-    account.lastInterestDate = now;
+    // Save the updated account
     await updateAccount(account);
   }
 
