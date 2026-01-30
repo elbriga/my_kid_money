@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:confetti/confetti.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import '../services/storage_service.dart';
 import '../models/transaction.dart';
 import '../models/account.dart';
 import '../widgets/balance_card.dart';
+import '../theme/colors.dart';
 
 class WithdrawScreen extends StatefulWidget {
   const WithdrawScreen({super.key});
@@ -15,6 +18,8 @@ class WithdrawScreen extends StatefulWidget {
 class _WithdrawScreenState extends State<WithdrawScreen> {
   final controllerValor = TextEditingController();
   final controllerDescricao = TextEditingController();
+  late ConfettiController _confettiController;
+  late AudioPlayer _audioPlayer;
 
   Account? _currentAccount;
   bool _isLoading = true;
@@ -27,6 +32,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   void initState() {
     super.initState();
     _loadAccount();
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 4),
+    );
+    _audioPlayer = AudioPlayer();
   }
 
   Future<void> _loadAccount() async {
@@ -45,26 +54,32 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     }
   }
 
-  Future<void> doWithdraw() async {
-    final value = double.tryParse(controllerValor.text.replaceAll(',', '.'));
-    if (value == null || value <= 0) return showMsg("Valor inválido");
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
-    final currentAccount = await StorageService.getCurrentAccount();
-    if (currentAccount == null) {
+  Future<void> doWithdraw() async {
+    if (_currentAccount == null) {
       showMsg(
         "Nenhuma conta selecionada. Por favor, selecione ou crie uma conta.",
       );
       return;
     }
 
-    if (currentAccount.password?.isNotEmpty == true) {
-      _showPasswordDialog(value, currentAccount);
+    final value = double.tryParse(controllerValor.text.replaceAll(',', '.'));
+    if (value == null || value <= 0) return showMsg("Valor inválido");
+
+    if (_currentAccount!.password?.isNotEmpty == true) {
+      _showPasswordDialog(value);
     } else {
-      _performWithdrawal(value, currentAccount);
+      _performWithdrawal(value);
     }
   }
 
-  Future<void> _showPasswordDialog(double value, Account currentAccount) async {
+  Future<void> _showPasswordDialog(double value) async {
     final passwordController = TextEditingController();
     showDialog(
       context: context,
@@ -89,9 +104,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   return;
                 }
                 if (passwordController.text ==
-                    (currentAccount.password ?? '')) {
+                    (_currentAccount!.password ?? '')) {
                   Navigator.pop(context);
-                  _performWithdrawal(value, currentAccount);
+                  _performWithdrawal(value);
                 } else {
                   showMsg('Senha incorreta');
                 }
@@ -104,12 +119,16 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
-  Future<void> _performWithdrawal(double value, Account currentAccount) async {
+  Future<void> _performWithdrawal(double value) async {
     final desc = controllerDescricao.text;
 
-    if (value > currentAccount.balance) return showMsg("Saldo insuficiente");
+    if (value > _currentAccount!.balance) return showMsg("Saldo insuficiente");
 
-    final newBalance = currentAccount.balance - value;
+    // Play feedback
+    _confettiController.play();
+    _audioPlayer.play(AssetSource('audio/deposit.mp3'));
+
+    final newBalance = _currentAccount!.balance - value;
 
     final newTransaction = AppTransaction(
       value: -value, // Withdrawal is a negative value
@@ -118,74 +137,92 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       description: desc,
     );
 
-    currentAccount.addTransaction(newTransaction);
-    await StorageService.updateAccount(currentAccount);
+    setState(() {
+      _currentAccount!.addTransaction(newTransaction);
+    });
+    await StorageService.updateAccount(_currentAccount!);
+
+    // Wait a bit for the user to see the animation
+    await Future.delayed(const Duration(milliseconds: 1500));
 
     if (mounted) Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sacar", style: TextStyle(fontSize: 24)),
-      ),
-      backgroundColor: Colors.purple[50],
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _currentAccount == null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Não foi possível carregar a conta.'),
-                  ElevatedButton(
-                    onPressed: () {
-                      _loadAccount();
-                    },
-                    child: const Text('Tentar novamente'),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: const Text("Sacar", style: TextStyle(fontSize: 24)),
+          ),
+          backgroundColor: Colors.purple[50],
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _currentAccount == null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Não foi possível carregar a conta.'),
+                      ElevatedButton(
+                        onPressed: () {
+                          _loadAccount();
+                        },
+                        child: const Text('Tentar novamente'),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  BalanceCard(
-                    balance: _currentAccount!.balance,
-                    icon: 'cifrao',
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      BalanceCard(
+                        balance: _currentAccount!.balance,
+                        icon: 'cifrao',
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: controllerValor,
+                        decoration: const InputDecoration(labelText: "Valor"),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: controllerDescricao,
+                        decoration: const InputDecoration(
+                          labelText: "Descrição (opcional)",
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: doWithdraw,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Confirmar"),
+                            SizedBox(width: 16),
+                            Icon(Icons.keyboard_alt),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: controllerValor,
-                    decoration: const InputDecoration(labelText: "Valor"),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: controllerDescricao,
-                    decoration: const InputDecoration(
-                      labelText: "Descrição (opcional)",
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: doWithdraw,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Confirmar"),
-                        SizedBox(width: 16),
-                        Icon(Icons.keyboard_alt),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            colors: AppColors.confettiColors,
+          ),
+        ),
+      ],
     );
   }
 }

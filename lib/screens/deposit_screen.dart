@@ -62,6 +62,13 @@ class _DepositScreenState extends State<DepositScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
   Future<void> doDeposit() async {
+    if (_currentAccount == null) {
+      showMsg(
+        "Nenhuma conta selecionada. Por favor, selecione ou crie uma conta.",
+      );
+      return;
+    }
+
     final value = double.tryParse(controllerValor.text.replaceAll(',', '.'));
     if (value == null || value <= 0) {
       showMsg("Valor inválido");
@@ -72,19 +79,11 @@ class _DepositScreenState extends State<DepositScreen> {
     final ok = await BiometricService.authenticate("Confirme para Depositar");
     if (!ok) return showMsg("Falha na autenticação");
 
-    Account? currentAccount = await StorageService.getCurrentAccount();
-    if (currentAccount == null) {
-      showMsg(
-        "Nenhuma conta selecionada. Por favor, selecione ou crie uma conta.",
-      );
-      return;
-    }
-
     // Play feedback
     _confettiController.play();
     _audioPlayer.play(AssetSource('audio/deposit.mp3'));
 
-    final newBalance = currentAccount.balance + value;
+    final newBalance = _currentAccount!.balance + value;
 
     final newTransaction = AppTransaction(
       value: value,
@@ -93,8 +92,11 @@ class _DepositScreenState extends State<DepositScreen> {
       description: desc,
     );
 
-    currentAccount.addTransaction(newTransaction);
-    await StorageService.updateAccount(currentAccount);
+    setState(() {
+      // Update balance on screen
+      _currentAccount!.addTransaction(newTransaction);
+    });
+    await StorageService.updateAccount(_currentAccount!);
 
     // Wait a bit for the user to see the animation
     await Future.delayed(const Duration(milliseconds: 1500));
