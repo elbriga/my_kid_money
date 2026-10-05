@@ -64,7 +64,9 @@ class _UserSessionState extends State<_UserSession> {
   @override
   void initState() {
     super.initState();
-    _initialization = StorageService.init();
+    _initialization = StorageService.init().timeout(
+      const Duration(seconds: 15),
+    );
   }
 
   @override
@@ -79,11 +81,18 @@ class _UserSessionState extends State<_UserSession> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text('Não foi possível carregar seus dados.'),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Confira se o Cloud Firestore foi criado no Firebase e se as regras foram publicadas.',
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        _initialization = StorageService.init();
+                        _initialization = StorageService.init().timeout(
+                          const Duration(seconds: 15),
+                        );
                       });
                     },
                     child: const Text('Tentar novamente'),

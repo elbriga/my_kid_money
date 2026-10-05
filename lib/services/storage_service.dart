@@ -8,6 +8,7 @@ import '../models/transaction.dart';
 class StorageService {
   static const _currentAccountIdKey = 'currentAccountId';
   static const _childNameKey = 'childName';
+  static const _initialDataImportedKey = 'initialDataImported';
   static final Map<String, Set<String>> _persistedTransactionIds = {};
 
   static DocumentReference<Map<String, dynamic>> get _userDocument {
@@ -121,7 +122,9 @@ class StorageService {
 
   static Future<void> _saveAccount(Account account) async {
     final accountData = account.toJson()..remove('transactions');
-    await _accountsCollection.doc(account.id).set(accountData);
+    await _accountsCollection
+        .doc(account.id)
+        .set(accountData, SetOptions(merge: true));
 
     final persistedIds = _persistedTransactionIds.putIfAbsent(
       account.id,
@@ -220,37 +223,111 @@ class StorageService {
     await init();
   }
 
-  static Future<void> initData() async {
+  static Future<void> initData({bool resetExisting = false}) async {
     final account = await getCurrentAccount();
     if (account == null) {
       return;
     }
 
-    final transactions = [
-      [600.0, '2025-12-05 20:55', 'cache shopping São José'],
-      [100.0, '2025-12-06 21:00', 'mesada dezembro'],
-      [100.0, '2025-12-15 13:10', 'da vovó'],
-      [16.0, '2026-01-01 00:00', 'Juros 2.0 % janeiro 2026'],
-      [100.0, '2026-01-08 20:53', 'mesada janeiro'],
-      [700.0, '2026-01-10 14:30', 'Cache natal ssj 2'],
-      [-25.0, '2026-01-11 17:11', 'sorvete Lálika'],
+    final accountReference = _accountsCollection.doc(account.id);
+    final accountSnapshot = await accountReference.get();
+    if (!resetExisting &&
+        accountSnapshot.data()?[_initialDataImportedKey] == true) {
+      return;
+    }
+    if (!resetExisting &&
+        (account.balance != 0 || account.transactions.isNotEmpty)) {
+      throw StateError(
+        'Os dados iniciais só podem ser importados para uma conta vazia.',
+      );
+    }
+
+    final transactionCollection = accountReference.collection('transactions');
+    final existingTransactions = resetExisting
+        ? await transactionCollection.get()
+        : null;
+
+    final sampleTransactions = <Map<String, Object>>[
+      {
+        'value': 600.0,
+        'timestamp': '2025-12-05 20:55',
+        'description': 'cache shopping São José',
+      },
+      {
+        'value': 100.0,
+        'timestamp': '2025-12-06 21:00',
+        'description': 'mesada dezembro',
+      },
+      {
+        'value': 100.0,
+        'timestamp': '2025-12-15 13:10',
+        'description': 'da vovó',
+      },
+      {
+        'value': 16.0,
+        'timestamp': '2026-01-01 00:00',
+        'description': 'Juros 2.0 % janeiro 2026',
+      },
+      {
+        'value': 100.0,
+        'timestamp': '2026-01-08 20:53',
+        'description': 'mesada janeiro',
+      },
+      {
+        'value': 700.0,
+        'timestamp': '2026-01-10 14:30',
+        'description': 'Cache natal ssj 2',
+      },
+      {
+        'value': -25.0,
+        'timestamp': '2026-01-11 17:11',
+        'description': 'sorvete Lálika',
+      },
     ];
 
-    var balance = 0.0;
-    for (var transaction in transactions) {
-      var value = transaction[0] as double;
+    final batch = FirebaseFirestore.instance.batch();
+    final transactionIds = <String>{};
+    final sampleTransactionIds = {
+      for (var index = 0; index < sampleTransactions.length; index++)
+        'initial-data-${index + 1}',
+    };
+    for (final transaction in existingTransactions?.docs ?? []) {
+      if (!sampleTransactionIds.contains(transaction.id)) {
+        batch.delete(transaction.reference);
+      }
+    }
+
+    var balance = resetExisting ? 0.0 : account.balance;
+    for (var index = 0; index < sampleTransactions.length; index++) {
+      final sample = sampleTransactions[index];
+      final value = sample['value'] as double;
       balance += value;
 
       final newTransaction = AppTransaction(
+        id: 'initial-data-${index + 1}',
         value: value,
-        timestamp: DateTime.parse('${transaction[1]}:00'),
+        timestamp: DateTime.parse('${sample['timestamp']}:00'),
         balanceAfter: balance,
-        description: transaction[2] as String,
+        description: sample['description'] as String,
       );
 
-      account.addTransaction(newTransaction);
+      batch.set(transactionCollection.doc(newTransaction.id), {
+        'value': newTransaction.value,
+        'description': newTransaction.description,
+        'balanceAfter': newTransaction.balanceAfter,
+        'timestamp': Timestamp.fromDate(newTransaction.timestamp),
+      });
+      transactionIds.add(newTransaction.id);
     }
 
-    await StorageService.updateAccount(account);
+    account.balance = balance;
+    account.transactions = [];
+    account.lastInterestDate = DateTime(2026, 1, 1);
+    final accountData = account.toJson()..remove('transactions');
+    accountData[_initialDataImportedKey] = true;
+    batch.set(accountReference, accountData, SetOptions(merge: true));
+    await batch.commit();
+
+    _persistedTransactionIds[account.id] = transactionIds;
   }
 }

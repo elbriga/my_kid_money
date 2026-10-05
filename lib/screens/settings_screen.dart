@@ -20,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _taxController = TextEditingController();
   final _imagePicker = ImagePicker();
   String? _imagePath;
+  bool _isImporting = false;
 
   @override
   void initState() {
@@ -138,10 +139,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _importInitialData() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Zerar e carregar dados?'),
+        content: const Text(
+          'O saldo e o histórico atuais desta conta serão apagados e '
+          'substituídos por 7 lançamentos de exemplo. O saldo ficará em '
+          'R\$ 1.591,00. O nome e as configurações da conta serão mantidos.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Zerar e carregar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isImporting = true);
+    try {
+      await StorageService.initData(resetExisting: true);
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Dados de exemplo carregados!')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível carregar os dados.')),
+      );
+    } finally {
+      if (mounted) setState(() => _isImporting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     //StorageService.initData();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações da Conta')),
       body: SingleChildScrollView(
@@ -192,6 +235,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(onPressed: _save, child: const Text('Salvar')),
+              /*const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _isImporting ? null : _importInitialData,
+                  icon: _isImporting
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.cloud_download_outlined),
+                  label: Text(
+                    _isImporting
+                        ? 'Carregando dados...'
+                        : 'Zerar conta e carregar dados de exemplo',
+                  ),
+                ),
+              ),*/
               const SizedBox(height: 60),
               ElevatedButton(
                 onPressed: _showAddAccountDialog,
