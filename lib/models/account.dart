@@ -23,20 +23,20 @@ class Account {
     this.password,
     this.tax,
     this.lastInterestDate,
-  })  : id = id ?? uuid.v4(),
-        transactions = transactions ?? [];
+  }) : id = id ?? uuid.v4(),
+       transactions = transactions ?? [];
 
   factory Account.fromJson(Map<String, dynamic> json) {
     return Account(
       id: json['id'] as String,
       name: json['name'] as String,
-      balance: json['balance'] as double,
-      transactions: (json['transactions'] as List<dynamic>)
+      balance: (json['balance'] as num).toDouble(),
+      transactions: ((json['transactions'] as List<dynamic>?) ?? [])
           .map((e) => AppTransaction.fromJson(e as Map<String, dynamic>))
           .toList(),
       imagePath: json['imagePath'] as String?,
       password: json['password'] as String?,
-      tax: json['tax'] as double?,
+      tax: (json['tax'] as num?)?.toDouble(),
       lastInterestDate: json['lastInterestDate'] != null
           ? DateTime.parse(json['lastInterestDate'] as String)
           : null,

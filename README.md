@@ -8,7 +8,7 @@ Este é um aplicativo móvel desenvolvido em Flutter que funciona como uma conta
 
 - **Framework:** [Flutter](https://flutter.dev/)
 - **Linguagem:** [Dart](https://dart.dev/)
-- **Armazenamento Local:** [shared_preferences](https://pub.dev/packages/shared_preferences) para persistir o saldo da conta e o histórico de transações no dispositivo.
+- **Persistência e autenticação:** Firebase Authentication e Cloud Firestore. As contas e transações são isoladas por usuário.
 - **Visualização de Dados:** [fl_chart](https://pub.dev/packages/fl_chart) para exibir o histórico de saldo em um gráfico de linhas.
 
 ## Arquitetura
@@ -28,6 +28,18 @@ O estado da aplicação é gerenciado de forma simples, utilizando `StatefulWidg
 ## TODO List
 
 - Modo multi-filhos! Uma conta para cada com uma seleção de filho na tela inicial
+
+## Configuração Firebase
+
+O app usa Firebase Authentication com e-mail e senha e salva os dados no Cloud Firestore em `users/{uid}/accounts`, com transações em uma subcoleção de cada conta. A configuração de plataforma fica em `lib/firebase_options.dart` e `android/app/google-services.json`.
+
+Ative o provedor **E-mail/senha** no Firebase Authentication e crie o banco Cloud Firestore no projeto. Para instalar as regras de acesso definidas em `firestore.rules`, execute:
+
+```bash
+firebase deploy --only firestore:rules --project my-kid-money
+```
+
+As regras permitem que cada usuário autenticado acesse somente os próprios documentos. Os dados que já estavam no SharedPreferences não são importados; ao entrar pela primeira vez, o app cria a conta padrão no Firestore.
 
 ## Como Executar o Projeto
 

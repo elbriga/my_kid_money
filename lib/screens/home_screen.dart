@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -40,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     try {
       _accounts = await StorageService.getAccounts();
-      final currentAccountId = StorageService.getCurrentAccountId();
+      final currentAccountId = await StorageService.getCurrentAccountId();
 
       if (_accounts.isEmpty) {
         // This case should ideally be handled by StorageService.init()
@@ -163,6 +164,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sair da conta',
+            onPressed: () => FirebaseAuth.instance.signOut(),
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Configurações',

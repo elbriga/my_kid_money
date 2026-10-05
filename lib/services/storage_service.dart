@@ -1,29 +1,40 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/account.dart';
 import '../models/transaction.dart';
 
 class StorageService {
-  static late SharedPreferences _prefs;
-
-  static const _accountsListKey = 'accountsList';
   static const _currentAccountIdKey = 'currentAccountId';
-  static const _childNameKey = 'childName'; // Still global for now
+  static const _childNameKey = 'childName';
+  static final Map<String, Set<String>> _persistedTransactionIds = {};
+
+  static DocumentReference<Map<String, dynamic>> get _userDocument {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw StateError('É necessário entrar para acessar os dados.');
+    }
+    return FirebaseFirestore.instance.collection('users').doc(user.uid);
+  }
+
+  static CollectionReference<Map<String, dynamic>> get _accountsCollection =>
+      _userDocument.collection('accounts');
 
   static Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
-
-    // Initialize accounts if they don't exist
-    if (!_prefs.containsKey(_accountsListKey)) {
-      final defaultAccount = Account(name: 'Meu Cofrinho');
-      await _saveAllAccounts([defaultAccount]);
-      await _prefs.setString(_currentAccountIdKey, defaultAccount.id);
-    }
-    _prefs.setString(_childNameKey, _prefs.getString(_childNameKey) ?? '');
-
     final accounts = await _loadAllAccounts();
+    if (accounts.isEmpty) {
+      final defaultAccount = Account(name: 'Meu Cofrinho');
+      await addAccount(defaultAccount);
+      await setCurrentAccountId(defaultAccount.id);
+    } else {
+      final currentAccountId = await getCurrentAccountId();
+      if (currentAccountId == null ||
+          !accounts.any((account) => account.id == currentAccountId)) {
+        await setCurrentAccountId(accounts.first.id);
+      }
+    }
+
     for (final account in accounts) {
       await _applyInterest(account);
     }
@@ -72,48 +83,93 @@ class StorageService {
     await updateAccount(account);
   }
 
+  static Future<Account> _loadAccount(
+    DocumentSnapshot<Map<String, dynamic>> document,
+  ) async {
+    final transactionSnapshot = await document.reference
+        .collection('transactions')
+        .orderBy('timestamp')
+        .get();
+    final transactionIds = transactionSnapshot.docs
+        .map((transaction) => transaction.id)
+        .toSet();
+    _persistedTransactionIds[document.id] = transactionIds;
+
+    final transactions = transactionSnapshot.docs.map((transaction) {
+      final data = transaction.data();
+      final timestamp = data['timestamp'];
+      return <String, dynamic>{
+        ...data,
+        'id': transaction.id,
+        'timestamp': timestamp is Timestamp
+            ? timestamp.toDate().toIso8601String()
+            : timestamp as String,
+      };
+    }).toList();
+
+    return Account.fromJson({
+      ...document.data()!,
+      'id': document.id,
+      'transactions': transactions,
+    });
+  }
+
   static Future<List<Account>> _loadAllAccounts() async {
-    final accountsJson = _prefs.getStringList(_accountsListKey) ?? [];
-    return accountsJson
-        .map((json) => Account.fromJson(jsonDecode(json)))
-        .toList();
+    final snapshot = await _accountsCollection.get();
+    return Future.wait(snapshot.docs.map(_loadAccount));
   }
 
-  static Future<void> _saveAllAccounts(List<Account> accounts) async {
-    final accountsJson = accounts
-        .map((account) => jsonEncode(account.toJson()))
-        .toList();
-    await _prefs.setStringList(_accountsListKey, accountsJson);
-  }
+  static Future<void> _saveAccount(Account account) async {
+    final accountData = account.toJson()..remove('transactions');
+    await _accountsCollection.doc(account.id).set(accountData);
 
-  static Future<void> addAccount(Account account) async {
-    final accounts = await _loadAllAccounts();
-    accounts.add(account);
-    await _saveAllAccounts(accounts);
-  }
-
-  static Future<void> updateAccount(Account updatedAccount) async {
-    final accounts = await _loadAllAccounts();
-    final index = accounts.indexWhere(
-      (account) => account.id == updatedAccount.id,
+    final persistedIds = _persistedTransactionIds.putIfAbsent(
+      account.id,
+      () => <String>{},
     );
-    if (index != -1) {
-      accounts[index] = updatedAccount;
-      await _saveAllAccounts(accounts);
+    final transactions = _accountsCollection
+        .doc(account.id)
+        .collection('transactions');
+    for (final transaction in account.transactions) {
+      if (persistedIds.contains(transaction.id)) continue;
+      await transactions.doc(transaction.id).set({
+        'value': transaction.value,
+        'description': transaction.description,
+        'balanceAfter': transaction.balanceAfter,
+        'timestamp': Timestamp.fromDate(transaction.timestamp),
+      });
+      persistedIds.add(transaction.id);
     }
   }
 
-  static Future<void> deleteAccount(String accountId) async {
-    List<Account> accounts = await _loadAllAccounts();
-    accounts.removeWhere((account) => account.id == accountId);
-    await _saveAllAccounts(accounts);
+  static Future<void> addAccount(Account account) async {
+    await _saveAccount(account);
+  }
 
-    // If the deleted account was the current one, select another or clear current
-    if (_prefs.getString(_currentAccountIdKey) == accountId) {
+  static Future<void> updateAccount(Account updatedAccount) async {
+    await _saveAccount(updatedAccount);
+  }
+
+  static Future<void> deleteAccount(String accountId) async {
+    final currentAccountId = await getCurrentAccountId();
+    final accountReference = _accountsCollection.doc(accountId);
+    final transactions = await accountReference
+        .collection('transactions')
+        .get();
+    for (final transaction in transactions.docs) {
+      await transaction.reference.delete();
+    }
+    await accountReference.delete();
+    _persistedTransactionIds.remove(accountId);
+
+    if (currentAccountId == accountId) {
+      final accounts = await _loadAllAccounts();
       if (accounts.isNotEmpty) {
         await setCurrentAccountId(accounts.first.id);
       } else {
-        await _prefs.remove(_currentAccountIdKey);
+        await _userDocument.set({
+          _currentAccountIdKey: FieldValue.delete(),
+        }, SetOptions(merge: true));
       }
     }
   }
@@ -123,37 +179,45 @@ class StorageService {
   }
 
   static Future<Account?> getAccount(String accountId) async {
-    final accounts = await _loadAllAccounts();
-    return accounts.firstWhere((account) => account.id == accountId);
+    final snapshot = await _accountsCollection.doc(accountId).get();
+    if (!snapshot.exists) return null;
+    return _loadAccount(snapshot);
   }
 
   static Future<void> setCurrentAccountId(String accountId) async {
-    await _prefs.setString(_currentAccountIdKey, accountId);
+    await _userDocument.set({
+      _currentAccountIdKey: accountId,
+    }, SetOptions(merge: true));
   }
 
-  static String? getCurrentAccountId() {
-    return _prefs.getString(_currentAccountIdKey);
+  static Future<String?> getCurrentAccountId() async {
+    final snapshot = await _userDocument.get();
+    return snapshot.data()?[_currentAccountIdKey] as String?;
   }
 
   static Future<Account?> getCurrentAccount() async {
-    final currentAccountId = getCurrentAccountId();
+    final currentAccountId = await getCurrentAccountId();
     if (currentAccountId == null) {
       return null;
     }
     return getAccount(currentAccountId);
   }
 
-  static String getChildName() => _prefs.getString(_childNameKey) ?? '';
+  static Future<String> getChildName() async {
+    final snapshot = await _userDocument.get();
+    return snapshot.data()?[_childNameKey] as String? ?? '';
+  }
 
-  static Future<void> setChildName(String name) async =>
-      _prefs.setString(_childNameKey, name);
+  static Future<void> setChildName(String name) async {
+    await _userDocument.set({_childNameKey: name}, SetOptions(merge: true));
+  }
 
   static Future<void> clearAllAccountsData() async {
-    await _prefs.remove(_accountsListKey);
-    await _prefs.remove(_currentAccountIdKey);
-    // Optionally clear childName as well if it's tied to account data
-    // await _prefs.remove(_childNameKey);
-    await init(); // Reinitialize with a default account
+    final accounts = await _loadAllAccounts();
+    for (final account in accounts) {
+      await deleteAccount(account.id);
+    }
+    await init();
   }
 
   static Future<void> initData() async {

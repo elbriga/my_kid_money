@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"my-kid-money","appId":"1:109608392661:android:00592128dba17fc40d8f5c","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"my-kid-money","configurations":{"android":"1:109608392661:android:00592128dba17fc40d8f5c","web":"1:109608392661:web:74176dae25e7f8280d8f5c"}}}}}}
+{
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "my-kid-money",
+                    "appId": "1:109608392661:android:00592128dba17fc40d8f5c",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "my-kid-money",
+                    "configurations": {
+                        "android": "1:109608392661:android:00592128dba17fc40d8f5c",
+                        "web": "1:109608392661:web:74176dae25e7f8280d8f5c"
+                    }
+                }
+            }
+        }
+    },
+    "firestore": {
+        "rules": "firestore.rules"
+    }
+}
