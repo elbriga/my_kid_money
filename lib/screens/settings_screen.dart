@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/account.dart';
-import '../services/biometric_service.dart';
 import '../services/storage_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -103,9 +102,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void showMsg(String m) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
-
   Future<void> _confirmDeleteAccount(BuildContext context) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
@@ -128,11 +124,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (confirm == true) {
-      final ok = await BiometricService.authenticate(
-        "Confirme para Apagar todos os dados",
-      );
-      if (!ok) return showMsg("Falha na autenticação");
-
       await _deleteAccount();
     }
   }

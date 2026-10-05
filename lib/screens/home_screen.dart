@@ -9,7 +9,6 @@ import 'withdraw_screen.dart';
 import '../theme/colors.dart';
 import '../models/account.dart';
 import '../services/storage_service.dart';
-import '../services/biometric_service.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/chart.dart';
 import '../widgets/button.dart';
@@ -128,22 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    Future<bool> auth(String msg) async {
-      final ok = await BiometricService.authenticate(msg);
-      if (!ok) {
-        showMsg("Falha na autenticação");
-      }
-      return ok;
-    }
-
-    Future<void> gotoScreen({
-      required StatefulWidget screen,
-      String? authMsg,
-    }) async {
-      if (authMsg != null) {
-        if (!await auth("Confirme para depositar")) return;
-        if (!context.mounted) return;
-      }
+    Future<void> gotoScreen({required StatefulWidget screen}) async {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
       _loadData();
     }
@@ -182,10 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Configurações',
-            onPressed: () => gotoScreen(
-              screen: SettingsScreen(account: _currentAccount!),
-              authMsg: "Confirme sua identidade!",
-            ),
+            onPressed: () =>
+                gotoScreen(screen: SettingsScreen(account: _currentAccount!)),
           ),
         ],
       ),

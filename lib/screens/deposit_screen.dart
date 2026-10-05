@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-import '../services/biometric_service.dart';
 import '../services/storage_service.dart';
 import '../theme/colors.dart';
 import '../widgets/balance_card.dart';
@@ -75,9 +74,6 @@ class _DepositScreenState extends State<DepositScreen> {
       return;
     }
     final desc = controllerDescricao.text;
-
-    final ok = await BiometricService.authenticate("Confirme para Depositar");
-    if (!ok) return showMsg("Falha na autenticação");
 
     // Play feedback
     _confettiController.play();
@@ -153,11 +149,7 @@ class _DepositScreenState extends State<DepositScreen> {
                         onPressed: doDeposit,
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Confirmar"),
-                            SizedBox(width: 16),
-                            Icon(Icons.fingerprint),
-                          ],
+                          children: [Text("Confirmar"), SizedBox(width: 16)],
                         ),
                       ),
                     ],
