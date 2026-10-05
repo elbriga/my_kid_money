@@ -32,7 +32,7 @@ class StorageService {
   static Future<void> _applyInterest(Account account) async {
     if (account.tax == null || account.tax! <= 0) {
       return;
-    }
+    }flutt  
 
     final now = DateTime.now();
     DateTime lastInterestDate = account.lastInterestDate ?? now;
