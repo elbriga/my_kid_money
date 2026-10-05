@@ -20,7 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _taxController = TextEditingController();
   final _imagePicker = ImagePicker();
   String? _imagePath;
-  bool _isImporting = false;
+  // bool _isImporting = false;
 
   @override
   void initState() {
